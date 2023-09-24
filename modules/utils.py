@@ -1,3 +1,12 @@
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+
+ENV = Environment(
+    loader=FileSystemLoader('./templates'),
+    autoescape=select_autoescape(['html', 'xml']),
+)
+
 class Notebook:
     
     NUMBER_OF_OBJ = 0
@@ -8,6 +17,10 @@ class Notebook:
     
     def __init__(self, header=None):
         self.set_header(header)
+        self.meta = dict(
+            creation_date=str(datetime.now().date()),
+            last_change_date=str(datetime.now().date()),
+        )
 
     def set_header(self, header=None):
         self.header = f'{self.__class__.__name__} {self.number_of_obj()}' if not header else header
@@ -19,25 +32,31 @@ class Notebook:
 
 class Writable(Notebook):
     """Represents objects, containing text, like Note or Lecture"""
-
-    def __new__(cls, *args, **kwargs):
-        return super().__new__(cls)
     
     def __init__(self, header=None):
         super().__init__(header)
         self.text = None
     
     def write(self, data):
-        # Этот метод должен быть переопределен в классах-наследниках
-        pass
+        """Write data"""
+        self.text = data
+
+    def render(self, template_name, **kwargs):
+        template = ENV.get_template(template_name)
+        print(template.render(**kwargs))
 
 
 class WritableSet(Notebook):
     """Represents set of writable objects"""
 
-    def __init__(self, header):
+    def __init__(self, header=None):
+        super().__init__(header)
         self.list = []
-        self.set_header(header)
+        
+    def create_child(self, header):
+        """Create new Writable instance"""
+        child = Writable(header)
+        self.list.append(child)
 
 
     
