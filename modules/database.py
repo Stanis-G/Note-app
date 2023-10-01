@@ -18,11 +18,6 @@ class DataBase:
                 result = func(self, *args, **kwargs)
             return result
         return wrapper
-    
-    def execute_by_header__(self, header, script):
-        """Execute script using header only"""
-        self.cur.execute(script, (header, ))
-        return self.cur.fetchall()
 
     @connect
     def create_db(self):
@@ -57,9 +52,8 @@ class DataBase:
         script = 'DELETE FROM notebooks WHERE header = ?'
         self.cur.execute(script, (header, ))
 
-
-
-
-
-
-
+    @connect
+    def update(self, header, header_new=None, text=None):
+        """Update data"""
+        script = 'UPDATE notebooks SET header = ?, text = ? WHERE header = ?'
+        self.cur.execute(script, (header_new, text, header))
