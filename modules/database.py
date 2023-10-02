@@ -1,4 +1,15 @@
 import sqlite3 as sq
+from datetime import datetime
+
+
+def connect(func):
+    """Create connection to db"""
+    def wrapper(obj, *args, **kwargs):
+        with sq.connect(obj.path) as conn:
+            obj.add_connection(conn)
+            result = func(obj, *args, **kwargs)
+        return result
+    return wrapper
 
 
 class DataBase:
@@ -7,23 +18,32 @@ class DataBase:
         self.path = path
         self.sql_folder = './sql/'
 
-    
-    def connect(func):
-        """Create connection to db"""
-        def wrapper(self, *args, **kwargs):
-            with sq.connect(self.path) as conn:
-                self.conn = conn
-                self.conn.row_factory = sq.Row
-                self.cur = self.conn.cursor()
-                result = func(self, *args, **kwargs)
-            return result
-        return wrapper
+    def add_connection(self, connection):
+        """Add connection attributes"""
+        self.conn = connection
+        self.conn.row_factory = sq.Row
+        self.cur = self.conn.cursor()
 
     @connect
-    def create_db(self):
+    def create_db__(self):
         with open(self.sql_folder + 'create_db.sql', mode='r') as f:
             self.cur.executescript(f.read())
 
+    @connect
+    def select_data_(self, table):
+        """Test function for watching db data"""
+        script = f'SELECT * FROM {table} LIMIT 10'
+        self.cur.execute(script)
+        result = self.cur.fetchall()
+        return dict(result[0])
+
+
+class TableWritable(DataBase):
+
+    def __init__(self, path):
+        super().__init__(path)
+
+    
     @connect
     def write(self, notebook):
         """Write data to db"""
@@ -57,3 +77,41 @@ class DataBase:
         """Update data"""
         script = 'UPDATE notebooks SET header = ?, text = ? WHERE header = ?'
         self.cur.execute(script, (header_new, text, header))
+
+
+class TableProfile(DataBase):
+
+    def __init__(self, path):
+        super().__init__(path)
+        self.table = 'profiles'
+
+    @connect
+    def create_profile(self, login, password):
+        """Create profile to db"""
+        script = f'INSERT INTO {self.table} (login, password, creation_date) VALUES (?, ?, ?)'
+        values = (
+            login,
+            password,
+            str(datetime.now().date()),
+        )
+        self.cur.execute(script, values)
+
+    @connect
+    def get_logins(self):
+        """Return list of all registered logins"""
+        script = 'SELECT login FROM profiles'
+        self.cur.execute(script)
+        result = self.cur.fetchall()
+        return [list(dict(i).values())[0] for i in result]
+    
+
+    @connect
+    def get_profile(self, login):
+        """Return profile data by login"""
+        script = f'SELECT * FROM profiles WHERE login = "{login}"'
+        self.cur.execute(script)
+        result = self.cur.fetchall()
+        return dict(result[0])
+
+        
+        

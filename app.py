@@ -5,6 +5,8 @@ from flask import (
     flash, session, redirect, abort
 )
 
+from modules.database import TableProfile
+
 
 # Конфигурационные переменные (обычно пишутся заглавными буквами)
 DATABASE = 'database.db' # Путь к БД
@@ -29,9 +31,9 @@ menu = [
 def set_menu(menu):
     menu_new = copy(menu)
     if 'userLogged' in session:
-        menu_new.append({'name': 'Выход', 'url': 'logout'})
+        menu_new.append({'name': 'Выход', 'url': '/logout'})
     else:
-        menu_new.append({'name': 'Вход', 'url': 'login'})
+        menu_new.append({'name': 'Вход', 'url': '/login'})
     return menu_new
 
 
@@ -63,16 +65,31 @@ def contact():
     return render_template('contact.html', title='Обратная связь', menu=set_menu(menu))
 
 
+@app.route("/new_profile", methods=['POST', 'GET'])
+def new_profile():
+    """Create new profile page"""
+    profiles = TableProfile('database.db')
+    if request.method == 'POST' and request.form['new_psw'] == request.form['psw_check']:
+        login = request.form['new_username']
+        psw = request.form['new_psw']
+        profiles.create_profile(login, psw)
+        flash('Профиль создан', category='success')
+    else:
+        flash('Пароли не совпадают', category='error')
+    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu(menu))
+
 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
-
+    """Login page"""
     # Если свойство userLogged есть в нашей сессии (т.е. юзер залогинился)
+    #print(request.form[''])
+    profiles = TableProfile('database.db')
     if 'userLogged' in session:
         # то делаем переадресацию на профиль данного юзера
         return redirect(url_for('profile', username=session['userLogged']))
     # Если форма логина заполнена, то берем свойства (имя и пароль) оттуда
-    elif request.method == 'POST' and request.form['username'] == 'selfedu' and request.form['psw'] == '123':
+    elif request.method == 'POST' and request.form['username'] in profiles.get_logins() and request.form['psw'] in profiles.get_profile(request.form['username'])['password']:
         session['userLogged'] = request.form['username']
         return redirect(url_for('profile', username=session['userLogged']))
     return render_template('login.html', title='Авторизация', menu=set_menu(menu))
@@ -80,7 +97,6 @@ def login():
 @app.route('/logout')
 def logout():
     if 'userLogged' in session:
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
         session.pop('userLogged')
     return redirect(url_for('login'))
 
@@ -90,10 +106,6 @@ def profile(username, app_name=app.name):
     """User profile handler"""
     if 'userLogged' not in session or session['userLogged'] != username:
         abort(401)
-    # Если пользователь не залогинен или имя юзера в текущей сессии не совпадает
-    # с переданным именем юзера, то вывести ошибку 401
-    # if 'userLogged' not in session or session['userLogged'] != username:
-    #     abort(401)
     return render_template("profile.html", app_name=app_name, title=f'Профиль: {username}', menu=set_menu(menu))
 
 # Error handler
