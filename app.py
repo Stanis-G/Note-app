@@ -41,7 +41,6 @@ def set_menu(menu):
 @app.route("/index")
 @app.route("/")
 def index(app_name=app.name):
-    print(menu)
     return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(menu))
 
 
@@ -69,13 +68,14 @@ def contact():
 def new_profile():
     """Create new profile page"""
     profiles = TableProfile('database.db')
-    if request.method == 'POST' and request.form['new_psw'] == request.form['psw_check']:
-        login = request.form['new_username']
-        psw = request.form['new_psw']
-        profiles.create_profile(login, psw)
-        flash('Профиль создан', category='success')
-    else:
-        flash('Пароли не совпадают', category='error')
+    if request.method == 'POST':
+        if request.form['new_psw'] == request.form['psw_check']:
+            login = request.form['new_username']
+            psw = request.form['new_psw']
+            profiles.create_profile(login, psw)
+            flash('Профиль создан', category='success')
+        else:
+            flash('Пароли не совпадают', category='error')
     return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu(menu))
 
 
@@ -89,9 +89,14 @@ def login():
         # то делаем переадресацию на профиль данного юзера
         return redirect(url_for('profile', username=session['userLogged']))
     # Если форма логина заполнена, то берем свойства (имя и пароль) оттуда
-    elif request.method == 'POST' and request.form['username'] in profiles.get_logins() and request.form['psw'] in profiles.get_profile(request.form['username'])['password']:
-        session['userLogged'] = request.form['username']
-        return redirect(url_for('profile', username=session['userLogged']))
+    if request.method == 'POST':
+        if request.form['username'] in profiles.get_logins() and request.form['psw'] == profiles.get_profile(request.form['username'])['password']:
+            session['userLogged'] = request.form['username']
+            return redirect(url_for('profile', username=session['userLogged']))
+        elif request.form['username'] not in profiles.get_logins():
+            flash('Неверно указано имя пользователя или пароль', category='error')
+        elif request.form['username'] in profiles.get_logins() and request.form['psw'] != profiles.get_profile(request.form['username'])['password']:
+            flash('Неверно указано имя пользователя или пароль', category='error')
     return render_template('login.html', title='Авторизация', menu=set_menu(menu))
 
 @app.route('/logout')

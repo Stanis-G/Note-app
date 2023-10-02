@@ -6,7 +6,7 @@
 {% for cat, msg in get_flashed_messages(True) %}
 <div class="flash {{cat}}">{{msg}}</div>
 {% endfor %}
-<form action="/profile" method="post" class="form-contact">
+<form action="/new_profile" method="post" class="form-contact">
     <p><label>Имя: </label><input type="text" name="new_username" value="" required />
     <p><label>Пароль: </label><input type="password" name="new_psw" value="" required />
     <p><label>Повторите пароль: </label><input type="password" name="psw_check" value="" required />
