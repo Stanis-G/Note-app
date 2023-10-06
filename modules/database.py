@@ -55,10 +55,10 @@ class TableWritable(DataBase):
         self.cur.execute(script, values)
 
     @connect
-    def get(self, header):
+    def get(self, owner, header):
         """Get data from db by header"""
-        script = 'SELECT * FROM notebooks WHERE header = ?'
-        self.cur.execute(script, (header, ))
+        script = 'SELECT * FROM notebooks WHERE owner = ? and header = ?'
+        self.cur.execute(script, (owner, header))
         result = self.cur.fetchall()
         try:
             return dict(result[0])

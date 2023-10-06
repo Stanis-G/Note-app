@@ -41,6 +41,9 @@ def is_user_logged():
     return None if 'userLogged' not in session else session['userLogged']
 
 
+# -----------------------------------------------------------------
+# main menu buttons
+
 # Main page
 @app.route("/index")
 @app.route("/")
@@ -65,7 +68,10 @@ def contact():
             flash('Сообщение отправлено', category='success')
         else:   
             flash('Ошибка отправки', category='error')
-    return render_template('contact.html', title='Обратная связь', menu=set_menu(menu))
+    return render_template('contact.html', title='Обратная связь', menu=set_menu(menu), login=is_user_logged())
+
+# -----------------------------------------------------------------
+# profile handlers (note, that some of them contain TableProfile)
 
 
 @app.route("/new_profile", methods=['POST', 'GET'])
