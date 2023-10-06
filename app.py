@@ -37,18 +37,22 @@ def set_menu(menu):
     return menu_new
 
 
+def is_user_logged():
+    return None if 'userLogged' not in session else session['userLogged']
+
+
 # Main page
 @app.route("/index")
 @app.route("/")
 def index(app_name=app.name):
-    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(menu))
+    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(menu), login=is_user_logged())
 
 
 # Page with app description
 @app.route("/about")
 def about(app_name=app.name):
     """About handler"""
-    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(menu))
+    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(menu), login=is_user_logged())
 
 
 @app.route('/contact', methods=['POST', 'GET'])
@@ -83,7 +87,6 @@ def new_profile():
 def login():
     """Login page"""
     # Если свойство userLogged есть в нашей сессии (т.е. юзер залогинился)
-    #print(request.form[''])
     profiles = TableProfile('database.db')
     if 'userLogged' in session:
         # то делаем переадресацию на профиль данного юзера

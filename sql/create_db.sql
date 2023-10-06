@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS notebooks (
     text text NOT NULL,
     creation_date text NOT NULL,
     last_change_date text NOT NULL,
-    FOREIGN KEY (id_prof) REFERENCES profiles (id_prof)
+    FOREIGN KEY (id_prof) REFERENCES profiles (id_prof),
+    FOREIGN KEY (owner) REFERENCES profiles(login)
 );
 

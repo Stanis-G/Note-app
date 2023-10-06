@@ -2,5 +2,7 @@
 
 {% block content %}
 {{ super() }}
-<p>{{username}}
+    <p>{{username}}
+    <link type="text/css" href="{{url_for('static', filename='css/buttons.css')}}" rel="stylesheet" />
+    <button type="button" name="run_script">Создать заметку</button>
 {% endblock %}

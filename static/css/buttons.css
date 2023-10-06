@@ -1,0 +1,13 @@
+button[name="run_script"] { 
+    border: none;
+    border-radius: 7px;
+    padding: 10px 25px;
+    background: #ff9900;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: white;
+}
+button[name="run_script"]:hover { 
+    background: #ff6600;
+} 

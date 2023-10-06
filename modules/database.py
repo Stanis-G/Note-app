@@ -43,11 +43,10 @@ class TableWritable(DataBase):
     def __init__(self, path):
         super().__init__(path)
 
-    
     @connect
     def write(self, notebook):
         """Write data to db"""
-        script = 'INSERT INTO notebooks (header, text, creation_date, last_change_date) VALUES (?, ?, ?, ?)'
+        script = 'INSERT INTO notebooks (header, text, creation_date, last_change_date, owner) VALUES (?, ?, ?, ?, ?)'
         values = (
             notebook.header,
             notebook.text,

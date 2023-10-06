@@ -7,7 +7,7 @@ ENV = Environment(
     autoescape=select_autoescape(['html', 'xml']),
 )
 
-class Notebook:
+class WritableObject:
     
     NUMBER_OF_OBJ = 0
 
@@ -15,11 +15,12 @@ class Notebook:
         cls.NUMBER_OF_OBJ += 1
         return super().__new__(cls)
     
-    def __init__(self, header=None):
+    def __init__(self, owner, header=None):
         self.set_header(header)
         self.meta = dict(
             creation_date=str(datetime.now().date()),
             last_change_date=str(datetime.now().date()),
+            owner=owner,
         )
 
     def set_header(self, header=None):
@@ -30,7 +31,7 @@ class Notebook:
         return cls.NUMBER_OF_OBJ
 
 
-class Writable(Notebook):
+class Writable(WritableObject):
     """Represents objects, containing text, like Note or Lecture"""
     
     def __init__(self, header=None):
@@ -46,7 +47,7 @@ class Writable(Notebook):
         print(template.render(**kwargs))
 
 
-class WritableSet(Notebook):
+class WritableSet(WritableObject):
     """Represents set of writable objects"""
 
     def __init__(self, header=None):
@@ -59,4 +60,3 @@ class WritableSet(Notebook):
         self.list.append(child)
 
 
-    
