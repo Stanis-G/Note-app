@@ -67,3 +67,7 @@ div.content {
     border: 1px solid #FF4343;
     background: #FF9C9C;
 }
+
+img {
+    margin-top: -10px;
+}

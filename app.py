@@ -1,11 +1,11 @@
 import os
-from copy import copy
 from flask import (
     Flask, render_template, url_for, request, g,
     flash, session, redirect, abort
 )
 
 from modules.database import TableProfile
+from modules.utils import set_menu, is_user_logged
 
 
 # Конфигурационные переменные (обычно пишутся заглавными буквами)
@@ -22,25 +22,6 @@ app.config.from_object(__name__) # Загружаем конфигурацион
 # Переопределим путь к БД
 app.config.update(dict(DATABASE=os.path.join(app.root_path, 'database.db')))
 
-menu = [
-    {'name': 'Главная', 'url': '/index'},
-    {'name': 'О приложении', 'url': '/about'},
-    {'name': 'Обратная связь', 'url': '/contact'},
-]
-
-def set_menu(menu):
-    menu_new = copy(menu)
-    if 'userLogged' in session:
-        menu_new.append({'name': 'Выход', 'url': '/logout'})
-    else:
-        menu_new.append({'name': 'Вход', 'url': '/login'})
-    return menu_new
-
-
-def is_user_logged():
-    return None if 'userLogged' not in session else session['userLogged']
-
-
 # -----------------------------------------------------------------
 # main menu buttons
 
@@ -48,14 +29,14 @@ def is_user_logged():
 @app.route("/index")
 @app.route("/")
 def index(app_name=app.name):
-    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(menu), login=is_user_logged())
+    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(), login=is_user_logged())
 
 
 # Page with app description
 @app.route("/about")
 def about(app_name=app.name):
     """About handler"""
-    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(menu), login=is_user_logged())
+    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(), login=is_user_logged())
 
 
 @app.route('/contact', methods=['POST', 'GET'])
@@ -68,7 +49,7 @@ def contact():
             flash('Сообщение отправлено', category='success')
         else:   
             flash('Ошибка отправки', category='error')
-    return render_template('contact.html', title='Обратная связь', menu=set_menu(menu), login=is_user_logged())
+    return render_template('contact.html', title='Обратная связь', menu=set_menu(), login=is_user_logged())
 
 # -----------------------------------------------------------------
 # profile handlers (note, that some of them contain TableProfile)
@@ -86,7 +67,7 @@ def new_profile():
             flash('Профиль создан', category='success')
         else:
             flash('Пароли не совпадают', category='error')
-    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu(menu))
+    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu())
 
 
 @app.route("/login", methods=['POST', 'GET'])
@@ -106,7 +87,7 @@ def login():
             flash('Неверно указано имя пользователя или пароль', category='error')
         elif request.form['username'] in profiles.get_logins() and request.form['psw'] != profiles.get_profile(request.form['username'])['password']:
             flash('Неверно указано имя пользователя или пароль', category='error')
-    return render_template('login.html', title='Авторизация', menu=set_menu(menu))
+    return render_template('login.html', title='Авторизация', menu=set_menu())
 
 @app.route('/logout')
 def logout():
@@ -120,13 +101,13 @@ def profile(username, app_name=app.name):
     """User profile handler"""
     if 'userLogged' not in session or session['userLogged'] != username:
         abort(401)
-    return render_template("profile.html", app_name=app_name, title=f'Профиль: {username}', menu=set_menu(menu))
+    return render_template("profile.html", app_name=app_name, title=f'Профиль: {username}', menu=set_menu(), login=is_user_logged())
 
 # Error handler
 @app.errorhandler(404)
 def pageNotFound(error):
     """Not found (404) error handler"""
-    return render_template('base.html', title='Указанной страницы не существует', menu=set_menu(menu)), 404
+    return render_template('base.html', title='Указанной страницы не существует', menu=set_menu()), 404
 
 # Этот блок может остутствовать, а приложение будет запускаться из терминала
 if __name__ == "__main__":

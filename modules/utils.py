@@ -1,11 +1,6 @@
 from datetime import datetime
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from flask import session
 
-
-ENV = Environment(
-    loader=FileSystemLoader('./templates'),
-    autoescape=select_autoescape(['html', 'xml']),
-)
 
 class WritableObject:
     
@@ -42,10 +37,6 @@ class Writable(WritableObject):
         """Write data"""
         self.text = data
 
-    def render(self, template_name, **kwargs):
-        template = ENV.get_template(template_name)
-        print(template.render(**kwargs))
-
 
 class WritableSet(WritableObject):
     """Represents set of writable objects"""
@@ -60,3 +51,19 @@ class WritableSet(WritableObject):
         self.list.append(child)
 
 
+def set_menu():
+    menu = [
+        {'name': 'Главная', 'url': '/index'},
+        {'name': 'О приложении', 'url': '/about'},
+        {'name': 'Обратная связь', 'url': '/contact'},
+    ]
+    if 'userLogged' in session:
+        #menu.append({'name': session['userLogged'], 'url': f'/profile/{session["userLogged"]}'})
+        menu.append({'name': 'Выход', 'url': '/logout'})
+    else:
+        menu.append({'name': 'Вход', 'url': '/login'})
+    return menu
+
+
+def is_user_logged():
+    return None if 'userLogged' not in session else session['userLogged']
