@@ -11,3 +11,13 @@ button[name="run_script"] {
 button[name="run_script"]:hover { 
     background: #ff6600;
 } 
+
+.button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+}

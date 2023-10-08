@@ -29,8 +29,8 @@ class WritableObject:
 class Writable(WritableObject):
     """Represents objects, containing text, like Note or Lecture"""
     
-    def __init__(self, header=None):
-        super().__init__(header)
+    def __init__(self, owner, header=None):
+        super().__init__(owner, header)
         self.text = None
     
     def write(self, data):
@@ -41,7 +41,7 @@ class Writable(WritableObject):
 class WritableSet(WritableObject):
     """Represents set of writable objects"""
 
-    def __init__(self, header=None):
+    def __init__(self, owner, header=None):
         super().__init__(header)
         self.list = []
         

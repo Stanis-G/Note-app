@@ -4,5 +4,16 @@
 {{ super() }}
     <p>{{username}}
     <link type="text/css" href="{{url_for('static', filename='css/buttons.css')}}" rel="stylesheet" />
-    <button type="button" name="run_script">Создать заметку</button>
+    <!-- <a href="{{url_for('new_note')}}" class="button-link">Создать заметку</a> -->
+    <a href="{{url_for('new_note')}}"><button type="button" name="run_script">Создать заметку</button></a>
+
+{% for note in notes %}
+    <div style="border: 1px solid #aaa; box-shadow: 5px 5px 2px 2px #aaa; display: 
+        inline-block; padding: 10px;">
+        {{ note.header }}
+        <hr>
+        {{ note.creation_date }}
+    </div>
+{% endfor %}
+
 {% endblock %}

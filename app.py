@@ -4,7 +4,8 @@ from flask import (
     flash, session, redirect, abort
 )
 
-from modules.database import TableProfile
+from modules.note import Note
+from modules.database import TableProfile, TableWritable
 from modules.utils import set_menu, is_user_logged
 
 
@@ -101,13 +102,39 @@ def profile(username, app_name=app.name):
     """User profile handler"""
     if 'userLogged' not in session or session['userLogged'] != username:
         abort(401)
-    return render_template("profile.html", app_name=app_name, title=f'Профиль: {username}', menu=set_menu(), login=is_user_logged())
+    notes = TableWritable('database.db', session['userLogged'])
+    return render_template(
+        "profile.html",
+        app_name=app_name,
+        title=f'Профиль: {username}',
+        menu=set_menu(),
+        login=is_user_logged(),
+        notes=notes.get_all(),
+    )
 
 # Error handler
 @app.errorhandler(404)
 def pageNotFound(error):
     """Not found (404) error handler"""
     return render_template('base.html', title='Указанной страницы не существует', menu=set_menu()), 404
+
+
+# -----------------------------------------------------------------
+# note handlers
+
+
+@app.route('/new_note', methods=['POST', 'GET'])
+def new_note():
+    """Create new note page"""
+    note_table = TableWritable('database.db', session['userLogged'])
+    if request.method == 'POST':
+        header = request.form['header']
+        text = request.form['text']
+        note = Note(session['userLogged'], header)
+        note.write(text)
+        note_table.write(note)
+        flash('Заметка создана', category='success')
+    return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
 
 # Этот блок может остутствовать, а приложение будет запускаться из терминала
 if __name__ == "__main__":

@@ -36,12 +36,19 @@ class DataBase:
         self.cur.execute(script)
         result = self.cur.fetchall()
         return dict(result[0])
+    
+    @connect
+    def drop_table_(self, table):
+        """Delete table"""
+        script = f'DROP TABLE {table}'
+        self.cur.execute(script)
 
 
 class TableWritable(DataBase):
 
-    def __init__(self, path):
+    def __init__(self, path, username):
         super().__init__(path)
+        self.user = username
 
     @connect
     def write(self, notebook):
@@ -55,15 +62,23 @@ class TableWritable(DataBase):
         self.cur.execute(script, values)
 
     @connect
-    def get(self, owner, header):
-        """Get data from db by header"""
+    def get_one(self, header):
+        """Get one note from db by header"""
         script = 'SELECT * FROM notebooks WHERE owner = ? and header = ?'
-        self.cur.execute(script, (owner, header))
+        self.cur.execute(script, (self.user, header))
         result = self.cur.fetchall()
         try:
             return dict(result[0])
         except IndexError:
             raise ValueError(f'Header "{header}" does not exist')
+
+    @connect
+    def get_all(self):
+        """Get all notes for current owner"""
+        script = 'SELECT * FROM notebooks WHERE owner = ?'
+        self.cur.execute(script, (self.user, ))
+        result = self.cur.fetchall()
+        return [dict(note) for note in result]
     
     @connect
     def delete(self, header):
