@@ -3,17 +3,36 @@
 {% block content %}
 {{ super() }}
     <p>{{username}}
-    <link type="text/css" href="{{url_for('static', filename='css/buttons.css')}}" rel="stylesheet" />
+    <link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
     <!-- <a href="{{url_for('new_note')}}" class="button-link">Создать заметку</a> -->
     <a href="{{url_for('new_note')}}"><button type="button" name="run_script">Создать заметку</button></a>
 
+<div class="noteset">
 {% for note in notes %}
-    <div style="border: 1px solid #aaa; box-shadow: 5px 5px 2px 2px #aaa; display: 
-        inline-block; padding: 10px;">
+
+    <!-- <div class="note">
         {{ note.header }}
         <hr>
         {{ note.creation_date }}
-    </div>
+    </div> -->
+
+    {% if loop.index is not divisibleby(2) %}
+        <div class="noterow">
+        <div class="note">
+            {{ note.header }}
+            <b class="date">{{ note.creation_date }}</b>
+            <hr>
+        </div>
+    {% elif loop.index is divisibleby(2) or loop.last %}
+        <div class="note">
+            {{ note.header }}
+            <b class="date">{{ note.creation_date }}</b>
+            <hr>
+            {{ note.text }}
+        </div>
+        </div>
+    {% endif %}
 {% endfor %}
+</div>
 
 {% endblock %}

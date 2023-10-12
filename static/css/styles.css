@@ -71,3 +71,57 @@ div.content {
 img {
     margin-top: -10px;
 }
+
+button[name="run_script"] { 
+    border: none;
+    border-radius: 7px;
+    padding: 10px 25px;
+    background: #ff9900;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: white;
+}
+button[name="run_script"]:hover { 
+    background: #ff6600;
+} 
+
+.button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+}
+
+.noteset {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+}
+
+.noterow {
+    margin-bottom: 10px;
+}
+
+.note {
+    width: 200px;
+    height: 200px;
+    border: 1px solid #aaa;
+    box-shadow: 5px 5px 2px 2px #aaa;
+    padding: 10px;
+    margin-right: 20px;
+    float: left;
+    border-radius: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.date {
+    color: silver;
+    font-size: 10px;
+    font-style: oblique;
+}
