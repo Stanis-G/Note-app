@@ -18,6 +18,12 @@ class WritableObject:
             owner=owner,
         )
 
+    def set_meta(self, creation_date, last_change_date):
+        self.meta.update(dict(
+            creation_date=creation_date,
+            last_change_date=last_change_date,
+        ))
+
     def set_header(self, header=None):
         self.header = f'{self.__class__.__name__} {self.number_of_obj()}' if not header else header
 
@@ -49,6 +55,14 @@ class WritableSet(WritableObject):
         """Create new Writable instance"""
         child = Writable(header)
         self.list.append(child)
+
+
+class Regenerator:
+
+    def restore(self):
+        pass
+
+
 
 
 def set_menu():

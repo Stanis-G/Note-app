@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<p>{{note.header}}, {{note.text}}, {{note.meta.creation_date}}, {{note.meta.last_change_date}}, {{note.meta.owner}}</p>
+
+<form action="/note/{{note.header}}" method="post" class="form-note">
+    <p><label>Название: </label><input type="text" name="header" value="" required />
+    <p><label>Текст: </label>
+    <p><textarea name="text" rows=7 cols=40></textarea>
+    <p><input type="submit" value="Отправить" />
+</form>
+
+{% endblock %}

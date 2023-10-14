@@ -1,4 +1,4 @@
-from .utils import Writable, WritableSet
+from .utils import Writable, WritableSet, Regenerator
 
 
 class Note(Writable):
@@ -10,6 +10,16 @@ class Note(Writable):
     
 class NoteSet(WritableSet):
     """Represents sets of notes"""
+
+
+class NoteRegenerator(Regenerator):
+    """Restore Note obj from params, loaded from database"""
+
+    def restore(self, owner, header, text, creation_date, last_change_date):
+        note = Note(owner, header)
+        note.write(text)
+        note.set_meta(creation_date, last_change_date)
+        return note
 
 
     

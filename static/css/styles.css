@@ -72,7 +72,7 @@ img {
     margin-top: -10px;
 }
 
-button[name="run_script"] { 
+button[name="new_note"] { 
     border: none;
     border-radius: 7px;
     padding: 10px 25px;
@@ -82,7 +82,7 @@ button[name="run_script"] {
     font-weight: bold;
     color: white;
 }
-button[name="run_script"]:hover { 
+button[name="new_note"]:hover { 
     background: #ff6600;
 } 
 
@@ -118,6 +118,10 @@ button[name="run_script"]:hover {
     border-radius: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.note:hover {
+    border: 3px solid #ff9900;
 }
 
 .date {

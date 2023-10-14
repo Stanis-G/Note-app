@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import (
     Flask, render_template, url_for, request, g,
     flash, session, redirect, abort
@@ -55,22 +56,6 @@ def contact():
 # -----------------------------------------------------------------
 # profile handlers (note, that some of them contain TableProfile)
 
-
-@app.route("/new_profile", methods=['POST', 'GET'])
-def new_profile():
-    """Create new profile page"""
-    profiles = TableProfile('database.db')
-    if request.method == 'POST':
-        if request.form['new_psw'] == request.form['psw_check']:
-            login = request.form['new_username']
-            psw = request.form['new_psw']
-            profiles.create_profile(login, psw)
-            flash('Профиль создан', category='success')
-        else:
-            flash('Пароли не совпадают', category='error')
-    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu())
-
-
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     """Login page"""
@@ -96,6 +81,22 @@ def logout():
         session.pop('userLogged')
     return redirect(url_for('login'))
 
+
+@app.route("/new_profile", methods=['POST', 'GET'])
+def new_profile():
+    """Create new profile page"""
+    profiles = TableProfile('database.db')
+    if request.method == 'POST':
+        if request.form['new_psw'] == request.form['psw_check']:
+            login = request.form['new_username']
+            psw = request.form['new_psw']
+            profiles.create_profile(login, psw)
+            flash('Профиль создан', category='success')
+        else:
+            flash('Пароли не совпадают', category='error')
+    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu())
+
+
 # Username profile page
 @app.route("/profile/<path:username>")
 def profile(username, app_name=app.name):
@@ -109,7 +110,7 @@ def profile(username, app_name=app.name):
         title=f'Профиль: {username}',
         menu=set_menu(),
         login=is_user_logged(),
-        notes=notes.get_all(),
+        notes=notes.get_all_notes(),
     )
 
 # Error handler
@@ -132,9 +133,43 @@ def new_note():
         text = request.form['text']
         note = Note(session['userLogged'], header)
         note.write(text)
-        note_table.write(note)
+        note_table.save_new(note)
         flash('Заметка создана', category='success')
     return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
+
+
+@app.route('/note/<path:header>', methods=['POST', 'GET'])
+def note(header):
+    """Note page"""
+    note_table = TableWritable('database.db', session['userLogged'])
+    #header = request.args.get('header') # Get header parameter from one passed to url_for in jinja2
+
+    note_old = note_table.get_note(header)
+
+    if request.method == 'GET':
+        # Open existing note
+        return render_template('note.html', title=header, menu=set_menu(), login=is_user_logged(), note=note_old)
+
+    elif request.method == 'POST':
+        # Change existing note
+        
+        # Take values from form
+        header_new = request.form['header']
+        text_new = request.form['text']
+
+        # Create new note, which will replace existing one
+        note_new = Note(session['userLogged'], header_new)
+        note_new.write(text_new)
+        note_new.set_meta(note_old.meta['creation_date'], str(datetime.now().date()))
+        
+        # Update existing note data in the db
+        note_table.update_existing(header_old=header, notebook_new=note_new)
+        return render_template('note.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
+
+
+
+
+
 
 # Этот блок может остутствовать, а приложение будет запускаться из терминала
 if __name__ == "__main__":

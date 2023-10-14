@@ -1,6 +1,8 @@
 import sqlite3 as sq
 from datetime import datetime
 
+from modules.note import Note, NoteRegenerator
+
 
 def connect(func):
     """Create connection to db"""
@@ -51,8 +53,8 @@ class TableWritable(DataBase):
         self.user = username
 
     @connect
-    def write(self, notebook):
-        """Write data to db"""
+    def save_new(self, notebook):
+        """Save new notebook to db"""
         script = 'INSERT INTO notebooks (header, text, creation_date, last_change_date, owner) VALUES (?, ?, ?, ?, ?)'
         values = (
             notebook.header,
@@ -62,18 +64,26 @@ class TableWritable(DataBase):
         self.cur.execute(script, values)
 
     @connect
-    def get_one(self, header):
+    def get_note(self, header):
         """Get one note from db by header"""
         script = 'SELECT * FROM notebooks WHERE owner = ? and header = ?'
         self.cur.execute(script, (self.user, header))
-        result = self.cur.fetchall()
+        note_params = self.cur.fetchall()
         try:
-            return dict(result[0])
+            note_params = dict(note_params[0])
         except IndexError:
             raise ValueError(f'Header "{header}" does not exist')
+        note = NoteRegenerator().restore(
+            note_params['owner'],
+            note_params['header'],
+            note_params['text'],
+            note_params['creation_date'],
+            note_params['last_change_date'],
+        )
+        return note
 
     @connect
-    def get_all(self):
+    def get_all_notes(self):
         """Get all notes for current owner"""
         script = 'SELECT * FROM notebooks WHERE owner = ?'
         self.cur.execute(script, (self.user, ))
@@ -87,10 +97,15 @@ class TableWritable(DataBase):
         self.cur.execute(script, (header, ))
 
     @connect
-    def update(self, header, header_new=None, text=None):
-        """Update data"""
-        script = 'UPDATE notebooks SET header = ?, text = ? WHERE header = ?'
-        self.cur.execute(script, (header_new, text, header))
+    def update_existing(self, header_old, notebook_new):
+        """Update existing notebook"""
+        script = 'UPDATE notebooks SET header = ?, text = ?, last_change_date = ? WHERE header = ?'
+        self.cur.execute(script, (
+            notebook_new.header,
+            notebook_new.text,
+            str(datetime.now().date()),
+            header_old,
+        ))
 
 
 class TableProfile(DataBase):
