@@ -13,10 +13,12 @@ class WritableObject:
     def __init__(self, owner, header=None):
         self.set_header(header)
         self.meta = dict(
-            creation_date=str(datetime.now().date()),
-            last_change_date=str(datetime.now().date()),
+            creation_date=str(datetime.now()).split('.')[0],
+            last_change_date=str(datetime.now()).split('.')[0],
             owner=owner,
         )
+        print('AAAAAAAAAAAAAAAAAAAAAAAAAA')
+        print(self.meta['creation_date'])
 
     def set_meta(self, creation_date, last_change_date):
         self.meta.update(dict(

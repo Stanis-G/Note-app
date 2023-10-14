@@ -138,7 +138,7 @@ button[name="new_note"]:hover {
 }
 
 .date {
-    color: silver;
+    color: #aaa;
     font-size: 10px;
     font-style: oblique;
 }

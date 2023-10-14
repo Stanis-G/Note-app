@@ -142,7 +142,6 @@ def new_note():
 def note(header):
     """Note page"""
     note_table = TableWritable('database.db', session['userLogged'])
-    #header = request.args.get('header') # Get header parameter from one passed to url_for in jinja2
 
     note_old = note_table.get_note(header)
 
@@ -160,7 +159,7 @@ def note(header):
         # Create new note, which will replace existing one
         note_new = Note(session['userLogged'], header_new)
         note_new.write(text_new)
-        note_new.set_meta(note_old.meta['creation_date'], str(datetime.now().date()))
+        note_new.set_meta(note_old.meta['creation_date'], str(datetime.now()).split('.')[0])
         
         # Update existing note data in the db
         note_table.update_existing(header_old=header, notebook_new=note_new)
@@ -171,9 +170,6 @@ def note(header):
 def delete(header):
     """Delete note page"""
     note_table = TableWritable('database.db', session['userLogged'])
-    #header = request.args.get('header') # Get header parameter from one passed to url_for in jinja2
-    print('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
-    print(header)
     note_table.delete(header)
     return redirect(url_for('profile', username=session['userLogged']))
 

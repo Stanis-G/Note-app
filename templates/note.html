@@ -2,13 +2,14 @@
 
 {% block content %}
 {{ super() }}
-<p>{{note.header}}, {{note.text}}, {{note.meta.creation_date}}, {{note.meta.last_change_date}}, {{note.meta.owner}}</p>
+<link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
+<p class="date">Created {{note.meta.creation_date}}</p>
+<p class="date">Last change {{note.meta.last_change_date}}</p>
 
 <form action="/note/{{note.header}}" method="post" class="form-note">
-    <p><label>Название: </label><input type="text" name="header" value="" required />
-    <p><label>Текст: </label>
-    <p><textarea name="text" rows=7 cols=40></textarea>
-    <p><input type="submit" value="Отправить" />
+    <p><label>Название: </label><br><input type="text" name="header" value="{{note.header}}" value="" required />
+    <p><textarea name="text" placeholder="{{note.text}}" rows=7 cols=40>{{note.text}}</textarea>
+    <p><input type="submit" value="Сохранить" />
 </form>
 
 {% endblock %}

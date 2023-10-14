@@ -103,7 +103,7 @@ class TableWritable(DataBase):
         self.cur.execute(script, (
             notebook_new.header,
             notebook_new.text,
-            str(datetime.now().date()),
+            str(datetime.now()).split('.')[0],
             header_old,
         ))
 
@@ -121,7 +121,7 @@ class TableProfile(DataBase):
         values = (
             login,
             password,
-            str(datetime.now().date()),
+            str(datetime.now()).split('.')[0],
         )
         self.cur.execute(script, values)
 
