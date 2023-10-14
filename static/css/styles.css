@@ -84,7 +84,7 @@ button[name="new_note"] {
 }
 button[name="new_note"]:hover { 
     background: #ff6600;
-} 
+}
 
 .button-link {
     display: inline-block;
@@ -96,6 +96,11 @@ button[name="new_note"]:hover {
     border-radius: 5px;
 }
 
+.del-button {
+    color: #ff6600;
+    display: none;
+}
+
 .noteset {
     display: flex;
     flex-direction: column;
@@ -104,7 +109,7 @@ button[name="new_note"]:hover {
 }
 
 .noterow {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .note {
@@ -122,6 +127,14 @@ button[name="new_note"]:hover {
 
 .note:hover {
     border: 3px solid #ff9900;
+}
+
+.wrapper {
+    float: left;
+}
+
+.wrapper:hover .del-button {
+    display: block;
 }
 
 .date {

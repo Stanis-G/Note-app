@@ -167,6 +167,17 @@ def note(header):
         return render_template('note.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
 
 
+@app.route('/delete/<path:header>', methods=['POST', 'GET'])
+def delete(header):
+    """Delete note page"""
+    note_table = TableWritable('database.db', session['userLogged'])
+    #header = request.args.get('header') # Get header parameter from one passed to url_for in jinja2
+    print('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
+    print(header)
+    note_table.delete(header)
+    return redirect(url_for('profile', username=session['userLogged']))
+
+
 
 
 

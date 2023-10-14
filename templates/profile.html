@@ -12,22 +12,28 @@
 
     {% if loop.index is not divisibleby(2) %}
         <div class="noterow">
-        <a href="{{url_for('note', header=note.header)}}">
-        <div class="note">
-            {{ note.header }}
-            <b class="date">{{ note.creation_date }}</b>
-            <hr>
-        </div>
-        </a>
+            <div class="wrapper">
+                <a href="{{url_for('delete', header=note.header)}}"><button class="del-button">X</button></a>
+                <a href="{{url_for('note', header=note.header)}}">
+                <div class="note">
+                    {{ note.header }}
+                    <b class="date">{{ note.creation_date }}</b>
+                    <hr>
+                </div>
+                </a>
+            </div>
     {% elif loop.index is divisibleby(2) or loop.last %}
-        <a href="{{url_for('note', header=note.header)}}">
-        <div class="note">
-            {{ note.header }}
-            <b class="date">{{ note.creation_date }}</b>
-            <hr>
-            {{ note.text }}
-        </div>
-        </a>
+            <div class="wrapper">
+                <a href="{{url_for('delete', header=note.header)}}"><button class="del-button">X</button></a>
+                <a href="{{url_for('note', header=note.header)}}">
+                <div class="note">
+                    {{ note.header }}
+                    <b class="date">{{ note.creation_date }}</b>
+                    <hr>
+                    {{ note.text }}
+                </div>
+                </a>
+            </div>
         </div>
     {% endif %}
     
