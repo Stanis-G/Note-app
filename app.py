@@ -128,14 +128,15 @@ def pageNotFound(error):
 def new_note():
     """Create new note page"""
     note_table = TableWritable('database.db', session['userLogged'])
+    if request.method == 'GET':
+        return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
     if request.method == 'POST':
-        header = request.form['header']
         text = request.form['text']
-        note = Note(session['userLogged'], header)
+        note = Note(session['userLogged'], request.form['header'])
         note.write(text)
         note_table.save_new(note)
         flash('Заметка создана', category='success')
-    return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
+        return redirect(url_for('profile', username=session['userLogged']))
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])

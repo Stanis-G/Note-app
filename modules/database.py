@@ -87,8 +87,21 @@ class TableWritable(DataBase):
         """Get all notes for current owner"""
         script = 'SELECT * FROM notebooks WHERE owner = ?'
         self.cur.execute(script, (self.user, ))
-        result = self.cur.fetchall()
-        return [dict(note) for note in result]
+        all_notes_params = self.cur.fetchall()
+        
+        notes_lst = []
+        for note_params in all_notes_params:
+            note_params = dict(note_params)
+            note = NoteRegenerator().restore(
+                note_params['owner'],
+                note_params['header'],
+                note_params['text'],
+                note_params['creation_date'],
+                note_params['last_change_date'],
+            )
+            notes_lst.append(note)
+        notes_lst.sort(key=lambda note: note.meta['creation_date'], reverse=True)
+        return notes_lst
     
     @connect
     def delete(self, header):
