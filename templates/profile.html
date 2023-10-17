@@ -3,41 +3,23 @@
 {% block content %}
 {{ super() }}
     <p>{{username}}
-    <link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
-    <!-- <a href="{{url_for('new_note')}}" class="button-link">Создать заметку</a> -->
-    <a href="{{url_for('new_note')}}"><button type="button" name="new_note">Новая заметка</button></a>
 
-<div class="noteset">
-{% for note in notes %}
+<div class="section-block">
 
-    {% if loop.index is not divisibleby(2) %}
-        <div class="noterow">
-            <div class="wrapper">
-                <a href="{{url_for('delete', header=note.header)}}"><button class="del-button">X</button></a>
-                <a href="{{url_for('note', header=note.header)}}">
-                <div class="note">
-                    {{ note.header }}
-                    <b class="date">{{ note.creation_date }}</b>
-                    <hr>
-                </div>
-                </a>
-            </div>
-    {% elif loop.index is divisibleby(2) or loop.last %}
-            <div class="wrapper">
-                <a href="{{url_for('delete', header=note.header)}}"><button class="del-button">X</button></a>
-                <a href="{{url_for('note', header=note.header)}}">
-                <div class="note">
-                    {{ note.header }}
-                    <b class="date">{{ note.creation_date }}</b>
-                    <hr>
-                    {{ note.text }}
-                </div>
-                </a>
-            </div>
+    <a href="{{url_for('notes', username=login)}}">
+        <div class="section">
+            Заметки
         </div>
-    {% endif %}
-    
-{% endfor %}
+    </a>
+
+    <div class="section">
+        Lectures
+    </div>
+
+    <div class="section">
+        Calendar
+    </div>
+
 </div>
 
 {% endblock %}

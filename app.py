@@ -97,20 +97,16 @@ def new_profile():
     return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu())
 
 
-# Username profile page
 @app.route("/profile/<path:username>")
-def profile(username, app_name=app.name):
+def profile(username):
     """User profile handler"""
     if 'userLogged' not in session or session['userLogged'] != username:
         abort(401)
-    notes = TableWritable('database.db', session['userLogged'])
     return render_template(
         "profile.html",
-        app_name=app_name,
         title=f'Профиль: {username}',
         menu=set_menu(),
         login=is_user_logged(),
-        notes=notes.get_all_notes(),
     )
 
 # Error handler
@@ -122,6 +118,20 @@ def pageNotFound(error):
 
 # -----------------------------------------------------------------
 # note handlers
+
+@app.route("/profile/<path:username>/notes")
+def notes(username):
+    """User profile handler"""
+    if 'userLogged' not in session or session['userLogged'] != username:
+        abort(401)
+    notes = TableWritable('database.db', session['userLogged'])
+    return render_template(
+        "notes.html",
+        title='Заметки',
+        menu=set_menu(),
+        login=is_user_logged(),
+        notes=notes.get_all_notes(),
+    )
 
 
 @app.route('/new_note', methods=['POST', 'GET'])
@@ -136,7 +146,7 @@ def new_note():
         note.write(text)
         note_table.save_new(note)
         flash('Заметка создана', category='success')
-        return redirect(url_for('profile', username=session['userLogged']))
+        return redirect(url_for('notes', username=session['userLogged']))
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])
@@ -172,7 +182,7 @@ def delete(header):
     """Delete note page"""
     note_table = TableWritable('database.db', session['userLogged'])
     note_table.delete(header)
-    return redirect(url_for('profile', username=session['userLogged']))
+    return redirect(url_for('notes', username=session['userLogged']))
 
 
 
