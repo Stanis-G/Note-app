@@ -1,12 +1,7 @@
-CREATE TABLE IF NOT EXISTS mainmenu (
-    id_menu integer PRIMARY KEY AUTOINCREMENT,
-    title text NOT NULL,
-    url text NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS profiles (
-    id_prof integer PRIMARY KEY AUTOINCREMENT,
+    id_profile integer PRIMARY KEY AUTOINCREMENT,
     login text NOT NULL UNIQUE,
+    username text NOT NULL UNIQUE,
     password text NOT NULL,
     creation_date text NOT NULL
 );
@@ -14,12 +9,25 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS notebooks (
     id_note integer PRIMARY KEY AUTOINCREMENT,
     header text NOT NULL UNIQUE,
-    text text NOT NULL,
+    content text NOT NULL,
     creation_date text NOT NULL,
     last_change_date text NOT NULL,
-    id_prof integer,
-    owner text,
-    FOREIGN KEY (id_prof) REFERENCES profiles (id_prof),
-    FOREIGN KEY (owner) REFERENCES profiles (login)
+    deadline text,
+    id_owner integer,
+    owner username,
+    FOREIGN KEY (id_owner) REFERENCES profiles (id_profile),
+    FOREIGN KEY (owner) REFERENCES profiles (username)
+);
+
+CREATE TABLE IF NOT EXISTS lectures (
+    id_lectured integer PRIMARY KEY AUTOINCREMENT,
+    header text NOT NULL UNIQUE,
+    content text NOT NULL,
+    creation_date text NOT NULL,
+    last_change_date text NOT NULL,
+    id_owner integer,
+    owner username,
+    FOREIGN KEY (id_owner) REFERENCES profiles (id_profile),
+    FOREIGN KEY (owner) REFERENCES profiles (username)
 );
 

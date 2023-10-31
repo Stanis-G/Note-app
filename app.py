@@ -6,16 +6,18 @@ from flask import (
 )
 
 from modules.note import Note
-from modules.database import TableProfile, TableWritable
+from modules.database import TableNotes
 from modules.utils import set_menu, is_user_logged
+from handlers.profile_handlers import profile_print
 
 
-# Конфигурационные переменные (обычно пишутся заглавными буквами)
+# Config variables
 DATABASE = 'database.db' # Путь к БД
 DEBUG = True # Режим отладки
 SECRET_KEY = 'ghn2fdngssfis232dnfios253nfonsd'
 
 app = Flask(__name__)
+app.register_blueprint(profile_print)
 
 # Присваиваем приложению случайный секретный ключ
 # Используется для шифрования вводимых пользователем данных
@@ -25,89 +27,36 @@ app.config.from_object(__name__) # Загружаем конфигурацион
 app.config.update(dict(DATABASE=os.path.join(app.root_path, 'database.db')))
 
 # -----------------------------------------------------------------
-# main menu buttons
+# main menu pages
 
 # Main page
 @app.route("/index")
 @app.route("/")
 def index(app_name=app.name):
+    """Main page handler"""
     return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(), login=is_user_logged())
 
 
 # Page with app description
 @app.route("/about")
 def about(app_name=app.name):
-    """About handler"""
+    """About page handler"""
     return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(), login=is_user_logged())
 
 
 @app.route('/contact', methods=['POST', 'GET'])
 def contact():
     """Contact form handler"""
+
     if request.method == 'POST':
-        # Добавляем мгновенное сообщение
-        # category нужен для правильного выбора стилей
+
+        # Preliminary checks
         if len(request.form['username']) > 2:
             flash('Сообщение отправлено', category='success')
         else:   
             flash('Ошибка отправки', category='error')
     return render_template('contact.html', title='Обратная связь', menu=set_menu(), login=is_user_logged())
 
-# -----------------------------------------------------------------
-# profile handlers (note, that some of them contain TableProfile)
-
-@app.route("/login", methods=['POST', 'GET'])
-def login():
-    """Login page"""
-    # Если свойство userLogged есть в нашей сессии (т.е. юзер залогинился)
-    profiles = TableProfile('database.db')
-    if 'userLogged' in session:
-        # то делаем переадресацию на профиль данного юзера
-        return redirect(url_for('profile', username=session['userLogged']))
-    # Если форма логина заполнена, то берем свойства (имя и пароль) оттуда
-    if request.method == 'POST':
-        if request.form['username'] in profiles.get_logins() and request.form['psw'] == profiles.get_profile(request.form['username'])['password']:
-            session['userLogged'] = request.form['username']
-            return redirect(url_for('profile', username=session['userLogged']))
-        elif request.form['username'] not in profiles.get_logins():
-            flash('Неверно указано имя пользователя или пароль', category='error')
-        elif request.form['username'] in profiles.get_logins() and request.form['psw'] != profiles.get_profile(request.form['username'])['password']:
-            flash('Неверно указано имя пользователя или пароль', category='error')
-    return render_template('login.html', title='Авторизация', menu=set_menu())
-
-@app.route('/logout')
-def logout():
-    if 'userLogged' in session:
-        session.pop('userLogged')
-    return redirect(url_for('login'))
-
-
-@app.route("/new_profile", methods=['POST', 'GET'])
-def new_profile():
-    """Create new profile page"""
-    profiles = TableProfile('database.db')
-    if request.method == 'POST':
-        if request.form['new_psw'] == request.form['psw_check']:
-            login = request.form['new_username']
-            psw = request.form['new_psw']
-            profiles.create_profile(login, psw)
-            flash('Профиль создан', category='success')
-        else:
-            flash('Пароли не совпадают', category='error')
-    return render_template('new_profile.html', title='Регистрация нового профиля', menu=set_menu())
-
-
-@app.route("/profile/<path:username>")
-def profile(username):
-    """User profile handler"""
-    if 'userLogged' not in session or session['userLogged'] != username:
-        abort(401)
-    return render_template(
-        "profile.html",
-        title=f'Профиль: {username}',
-        menu=set_menu(),
-        login=is_user_logged(),
-    )
 
 # Error handler
 @app.errorhandler(404)
@@ -122,9 +71,11 @@ def pageNotFound(error):
 @app.route("/profile/<path:username>/notes")
 def notes(username):
     """User profile handler"""
-    if 'userLogged' not in session or session['userLogged'] != username:
+
+    if 'username' not in session or session['username'] != username:
         abort(401)
-    notes = TableWritable('database.db', session['userLogged'])
+    
+    notes = TableNotes('database.db', session['username'])
     return render_template(
         "notes.html",
         title='Заметки',
@@ -137,24 +88,26 @@ def notes(username):
 @app.route('/new_note', methods=['POST', 'GET'])
 def new_note():
     """Create new note page"""
-    note_table = TableWritable('database.db', session['userLogged'])
+
+    note_table = TableNotes('database.db', session['username'])
     if request.method == 'GET':
         return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
+    
     if request.method == 'POST':
         text = request.form['text']
-        note = Note(session['userLogged'], request.form['header'])
+        note = Note(session['username'], request.form['header'])
         note.write(text)
-        note_table.save_new(note)
+        note_table.save_note(note)
         flash('Заметка создана', category='success')
-        return redirect(url_for('notes', username=session['userLogged']))
+        return redirect(url_for('notes', username=session['username']))
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])
 def note(header):
     """Note page"""
-    note_table = TableWritable('database.db', session['userLogged'])
+    note_table = TableNotes('database.db', session['username'])
 
-    note_old = note_table.get_note(header)
+    note_old = note_table.get_note_by_header(header)
 
     if request.method == 'GET':
         # Open existing note
@@ -168,21 +121,97 @@ def note(header):
         text_new = request.form['text']
 
         # Create new note, which will replace existing one
-        note_new = Note(session['userLogged'], header_new)
+        params = dict(
+            header=header_new,
+            creation_date=note_old.creation_date,
+            last_change_date=str(datetime.now()).split('.')[0],
+            owner=note_old.owner,
+            content=note_old.content,
+        )
+        note_new = Note.restore_from_db(params)
         note_new.write(text_new)
-        note_new.set_meta(note_old.meta['creation_date'], str(datetime.now()).split('.')[0])
         
-        # Update existing note data in the db
-        note_table.update_existing(header_old=header, notebook_new=note_new)
+        # Update existing note in db
+        note_table.update_note(header_old=header, note_new=note_new)
+
         return render_template('note.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
+    
+
+@app.route("/profile/<path:username>/lectures")
+def lectures(username):
+    """User profile handler"""
+
+    if 'username' not in session or session['username'] != username:
+        abort(401)
+    
+    notes = TableNotes('database.db', session['username'])
+    return render_template(
+        "lectures.html",
+        title='Лекции',
+        menu=set_menu(),
+        login=is_user_logged(),
+        notes=lectures.get_all_notes(),
+    )
+    
+
+@app.route('/lecture/<path:header>', methods=['POST', 'GET'])
+def lecture(header):
+    """Note page"""
+    note_table = TableNotes('database.db', session['username'])
+
+    note_old = note_table.get_note_by_header(header)
+
+    if request.method == 'GET':
+        # Open existing note
+        return render_template('lecture.html', title=header, menu=set_menu(), login=is_user_logged(), note=note_old)
+
+    elif request.method == 'POST':
+        # Change existing note
+        
+        # Take values from form
+        header_new = request.form['header']
+        text_new = request.form['text']
+
+        # Create new note, which will replace existing one
+        params = dict(
+            header=header_new,
+            creation_date=note_old.creation_date,
+            last_change_date=str(datetime.now()).split('.')[0],
+            owner=note_old.owner,
+            content=note_old.content,
+        )
+        note_new = Note.restore_from_db(params)
+        note_new.write(text_new)
+        
+        # Update existing note in db
+        note_table.update_note(header_old=header, note_new=note_new)
+
+        return render_template('lecture.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
+    
+
+@app.route("/profile/<path:username>/calendar")
+def calendar(username):
+    """User profile handler"""
+
+    if 'username' not in session or session['username'] != username:
+        abort(401)
+    
+    notes = TableNotes('database.db', session['username'])
+    return render_template(
+        "calendar.html",
+        title='Заметки',
+        menu=set_menu(),
+        login=is_user_logged(),
+        notes=notes.get_all_notes(),
+    )
 
 
 @app.route('/delete/<path:header>', methods=['POST', 'GET'])
 def delete(header):
     """Delete note page"""
-    note_table = TableWritable('database.db', session['userLogged'])
+    note_table = TableNotes('database.db', session['username'])
     note_table.delete(header)
-    return redirect(url_for('notes', username=session['userLogged']))
+    return redirect(url_for('notes', username=session['username']))
 
 
 

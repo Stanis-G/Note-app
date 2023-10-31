@@ -2,23 +2,26 @@
 
 {% block content %}
 {{ super() }}
-    <p>{{username}}
 
 <div class="section-block">
 
-    <a href="{{url_for('notes', username=login)}}">
+    <a href="{{url_for('notes', username=username)}}">
         <div class="section">
             Заметки
         </div>
     </a>
 
-    <div class="section">
-        Lectures
-    </div>
+    <a href="{{url_for('lectures', username=username)}}">
+        <div class="section">
+            Лекции
+        </div>
+    </a>
 
-    <div class="section">
-        Calendar
-    </div>
+    <a href="{{url_for('calendar', username=username)}}">
+        <div class="section">
+            Календарь
+        </div>
+    </a>
 
 </div>
 

@@ -10,38 +10,44 @@ class WritableObject:
         cls.NUMBER_OF_OBJ += 1
         return super().__new__(cls)
     
+
     def __init__(self, owner, header=None):
         self.set_header(header)
-        self.meta = dict(
-            creation_date=str(datetime.now()).split('.')[0],
-            last_change_date=str(datetime.now()).split('.')[0],
-            owner=owner,
-        )
+        self.creation_date=str(datetime.now()).split('.')[0]
+        self.last_change_date=str(datetime.now()).split('.')[0]
+        self.owner=owner
 
-    def set_meta(self, creation_date, last_change_date):
-        self.meta.update(dict(
-            creation_date=creation_date,
-            last_change_date=last_change_date,
-        ))
 
     def set_header(self, header=None):
         self.header = f'{self.__class__.__name__} {self.number_of_obj()}' if not header else header
 
+
     @classmethod
     def number_of_obj(cls):
         return cls.NUMBER_OF_OBJ
+    
+
+    @classmethod
+    def restore_from_db(cls, db_params):
+        """Restore obj by params dict from db"""
+        note = cls(db_params['owner'], db_params['header'])
+        note.creation_date = db_params['creation_date']
+        note.last_change_date = db_params['last_change_date']
+        note.write(db_params['content'])
+        return note
+        
 
 
 class Writable(WritableObject):
-    """Represents objects, containing text, like Note or Lecture"""
+    """Represents objects, with content like Note or Lecture"""
     
     def __init__(self, owner, header=None):
         super().__init__(owner, header)
-        self.text = None
+        self.content = None
     
     def write(self, data):
         """Write data"""
-        self.text = data
+        self.content = data
 
 
 class WritableSet(WritableObject):
@@ -57,22 +63,13 @@ class WritableSet(WritableObject):
         self.list.append(child)
 
 
-class Regenerator:
-
-    def restore(self):
-        pass
-
-
-
-
 def set_menu():
     menu = [
         {'name': 'Главная', 'url': '/index'},
         {'name': 'О приложении', 'url': '/about'},
         {'name': 'Обратная связь', 'url': '/contact'},
     ]
-    if 'userLogged' in session:
-        #menu.append({'name': session['userLogged'], 'url': f'/profile/{session["userLogged"]}'})
+    if 'username' in session:
         menu.append({'name': 'Выход', 'url': '/logout'})
     else:
         menu.append({'name': 'Вход', 'url': '/login'})
@@ -80,4 +77,4 @@ def set_menu():
 
 
 def is_user_logged():
-    return None if 'userLogged' not in session else session['userLogged']
+    return None if 'username' not in session else session['username']

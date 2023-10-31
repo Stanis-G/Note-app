@@ -3,12 +3,12 @@
 {% block content %}
 {{ super() }}
 <link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
-<p class="date">Created {{note.meta.creation_date}}</p>
-<p class="date">Last change {{note.meta.last_change_date}}</p>
+<p class="date">Created {{note.creation_date}}</p>
+<p class="date">Last change {{note.last_change_date}}</p>
 
 <form action="/note/{{note.header}}" method="post" class="form-note">
     <p><label>Название: </label><br><input type="text" name="header" value="{{note.header}}" value="" required />
-    <p><textarea name="text" placeholder="{{note.text}}" rows=7 cols=40>{{note.text}}</textarea>
+    <p><textarea name="text" placeholder="{{note.content}}" rows=7 cols=40>{{note.content}}</textarea>
     <p><input type="submit" value="Сохранить" />
 </form>
 
