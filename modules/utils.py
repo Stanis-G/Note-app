@@ -78,3 +78,22 @@ def set_menu():
 
 def is_user_logged():
     return None if 'username' not in session else session['username']
+
+
+def error_replacer(error, replacement_error):
+    """Decorator for exceptions replace"""
+    def wrapper_ext(func):
+        def wrapper(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+            except error:
+                raise replacement_error
+            return result
+        return wrapper
+    return wrapper_ext
+
+
+class NameExistsError(Exception):
+
+    def __str__(self):
+        return "Указанное имя уже существует"

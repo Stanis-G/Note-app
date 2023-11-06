@@ -7,7 +7,7 @@ from flask import (
 
 from modules.note import Note
 from modules.database import TableNotes
-from modules.utils import set_menu, is_user_logged
+from modules.utils import set_menu, is_user_logged, NameExistsError
 from handlers.profile_handlers import profile_print
 
 
@@ -97,9 +97,12 @@ def new_note():
         text = request.form['text']
         note = Note(session['username'], request.form['header'])
         note.write(text)
-        note_table.save_note(note)
-        flash('Заметка создана', category='success')
-        return redirect(url_for('notes', username=session['username']))
+        try:
+            note_table.save_note(note)
+            return redirect(url_for('notes', username=session['username']))
+        except NameExistsError as exception_message:
+            flash(exception_message, category='error')
+            return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])

@@ -2,6 +2,7 @@ import sqlite3 as sq
 from datetime import datetime
 
 from modules.note import Note
+from modules.utils import error_replacer, NameExistsError
 
 
 def connect(func):
@@ -135,6 +136,7 @@ class TableNotes(TableWritable):
 
 
     @connect
+    @error_replacer(sq.IntegrityError, NameExistsError)
     def save_note(self, note):
         """Save new note to db"""
         script = f'INSERT INTO {self.table} (header, content, creation_date, last_change_date, owner) VALUES (?, ?, ?, ?, ?)'
@@ -178,4 +180,3 @@ class TableNotes(TableWritable):
             header_old,
         )
         self.cur.execute(script, values)
-    
