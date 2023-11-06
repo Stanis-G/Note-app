@@ -3,3 +3,6 @@
 
 # Compilated files
 *.pyc
+
+# Test notebook
+*.ipynb
