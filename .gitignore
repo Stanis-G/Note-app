@@ -1,2 +1,5 @@
 # database
 *.db
+
+# Compilated files
+*.pyc
