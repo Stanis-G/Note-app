@@ -10,8 +10,8 @@
 {% block content -%}
     {% block mainmenu -%}
     <ul class="mainmenu">
-        {% if login %}
-            <li><a href="/profile/{{login}}"><img src="{{url_for('static', filename='images/logo.png')}}" height="48" width="48"></a></li>
+        {% if username %}
+            <li><a href="/profile/{{username}}"><img src="{{url_for('static', filename='images/logo.png')}}" height="48" width="48"></a></li>
         {% else %}
             <li><img src="{{url_for('static', filename='images/logo.png')}}" height="48" width="48"></li>
         {% endif %}
@@ -19,16 +19,8 @@
         <li><a href="{{m.url}}">{{m.name}}</a></li>
         {% endfor -%}
     </ul>
-    <!-- <ul>
-    {% if login %}
-        <li><a href="/profile/{{login}}"><img src="images/logo.jpg"></a></li>
-    {% endif %}
-    </ul> -->
     {% endblock mainmenu -%}
 <div class="clear"></div>
-<div class="content">
-    <h1>{{title}}</h1>
 {% endblock -%}
-</div>
 </body>
 </html>

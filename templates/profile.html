@@ -7,19 +7,22 @@
 
     <a href="{{url_for('notes', username=username)}}">
         <div class="section">
-            Заметки
+            <img src="{{url_for('static', filename='images/note.png')}}" height="48" width="48">
+            <p>Заметки</p>
         </div>
     </a>
 
     <a href="{{url_for('lectures', username=username)}}">
         <div class="section">
-            Лекции
+            <img src="{{url_for('static', filename='images/lecture.png')}}" height="48" width="48">
+            <p>Лекции</p>
         </div>
     </a>
 
     <a href="{{url_for('calendar', username=username)}}">
         <div class="section">
-            Календарь
+            <img src="{{url_for('static', filename='images/calendar.png')}}" height="48" width="48">
+            <p>Календарь</p>
         </div>
     </a>
 

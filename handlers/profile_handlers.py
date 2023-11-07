@@ -4,7 +4,7 @@ from flask import (
 )
 
 from modules.database import TableProfile
-from modules.utils import set_menu, is_user_logged
+from modules.utils import set_menu
 
 
 profile_print = Blueprint(
@@ -81,5 +81,5 @@ def profile(username):
         "profile.html",
         title=f'Профиль: {username}',
         menu=set_menu(),
-        username=is_user_logged(),
+        username=session.get('username'),
     )

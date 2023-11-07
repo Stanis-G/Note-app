@@ -20,7 +20,7 @@ a:hover {
 ul.mainmenu {
     list-style: none;
     background: #3F4137;
-    height: 60px;
+    height: 8.5%; /* another 91.5% is for sidebar block */
     margin: 0;
     padding: 0;
     color: #fdc073;
@@ -73,6 +73,8 @@ img {
 }
 
 button[name="new_note"] { 
+    margin-top: 20px;
+    margin-left: 20px;
     border: none;
     border-radius: 7px;
     padding: 10px 25px;
@@ -144,7 +146,7 @@ button[name="new_note"]:hover {
 }
 
 .section-block {
-    margin: 0 auto;
+    margin-top: 20vh;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -154,14 +156,36 @@ button[name="new_note"]:hover {
     width: 200px;
     height: 200px;
     display: flex;
+    flex-direction: column; /* stacks items in section vertically */
     align-items: center;
     justify-content: center;
     border: 1px solid #aaa;
     box-shadow: 5px 5px 2px 2px #aaa;
     padding: 10px;
     margin-right: 20px;
-    float: left;
+    float:none;
     border-radius: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* sidebar and its references styles */
+.sidebar {
+    width: 5%;
+    height: 91.5%; /* another 8.5% is for mainmenu block */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #252620;
+    float: left;
+}
+
+.sideref {
+    margin-top: 30px; /* distance between sidebar elements */
+    text-align: center;
+}
+
+.sideref:first-child {
+    margin-top: 30vh; /* place every sidebar element vertically */
+}
+

@@ -7,7 +7,7 @@ from flask import (
 
 from modules.note import Note
 from modules.database import TableNotes
-from modules.utils import set_menu, is_user_logged
+from modules.utils import set_menu
 from handlers.profile_handlers import profile_print
 
 
@@ -34,14 +34,14 @@ app.config.update(dict(DATABASE=os.path.join(app.root_path, 'database.db')))
 @app.route("/")
 def index(app_name=app.name):
     """Main page handler"""
-    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(), login=is_user_logged())
+    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(), username=session.get('username'))
 
 
 # Page with app description
 @app.route("/about")
 def about(app_name=app.name):
     """About page handler"""
-    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(), login=is_user_logged())
+    return render_template("about.html", app_name=app_name, title="О сайте", menu=set_menu(), username=session.get('username'))
 
 
 @app.route('/contact', methods=['POST', 'GET'])
@@ -55,7 +55,7 @@ def contact():
             flash('Сообщение отправлено', category='success')
         else:   
             flash('Ошибка отправки', category='error')
-    return render_template('contact.html', title='Обратная связь', menu=set_menu(), login=is_user_logged())
+    return render_template('contact.html', title='Обратная связь', menu=set_menu(), username=session.get('username'))
 
 
 # Error handler
@@ -71,7 +71,7 @@ def pageNotFound(error):
 @app.route("/profile/<path:username>/notes")
 def notes(username):
     """User profile handler"""
-
+    print(username)
     if 'username' not in session or session['username'] != username:
         abort(401)
     
@@ -80,7 +80,7 @@ def notes(username):
         "notes.html",
         title='Заметки',
         menu=set_menu(),
-        login=is_user_logged(),
+        username=session.get('username'),
         notes=notes.get_all_notes(),
     )
 
@@ -91,7 +91,7 @@ def new_note():
 
     note_table = TableNotes('database.db', session['username'])
     if request.method == 'GET':
-        return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), login=is_user_logged())
+        return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), username=session.get('username'))
     
     if request.method == 'POST':
         text = request.form['text']
@@ -111,7 +111,7 @@ def note(header):
 
     if request.method == 'GET':
         # Open existing note
-        return render_template('note.html', title=header, menu=set_menu(), login=is_user_logged(), note=note_old)
+        return render_template('note.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
 
     elif request.method == 'POST':
         # Change existing note
@@ -134,7 +134,7 @@ def note(header):
         # Update existing note in db
         note_table.update_note(header_old=header, note_new=note_new)
 
-        return render_template('note.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
+        return render_template('note.html', title=header_new, menu=set_menu(), username=session.get('username'), note=note_new)
     
 
 @app.route("/profile/<path:username>/lectures")
@@ -149,7 +149,7 @@ def lectures(username):
         "lectures.html",
         title='Лекции',
         menu=set_menu(),
-        login=is_user_logged(),
+        username=session.get('username'),
         notes=lectures.get_all_notes(),
     )
     
@@ -163,7 +163,7 @@ def lecture(header):
 
     if request.method == 'GET':
         # Open existing note
-        return render_template('lecture.html', title=header, menu=set_menu(), login=is_user_logged(), note=note_old)
+        return render_template('lecture.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
 
     elif request.method == 'POST':
         # Change existing note
@@ -186,7 +186,7 @@ def lecture(header):
         # Update existing note in db
         note_table.update_note(header_old=header, note_new=note_new)
 
-        return render_template('lecture.html', title=header_new, menu=set_menu(), login=is_user_logged(), note=note_new)
+        return render_template('lecture.html', title=header_new, menu=set_menu(), username=session.get('username'), note=note_new)
     
 
 @app.route("/profile/<path:username>/calendar")
@@ -201,7 +201,7 @@ def calendar(username):
         "calendar.html",
         title='Заметки',
         menu=set_menu(),
-        login=is_user_logged(),
+        username=session.get('username'),
         notes=notes.get_all_notes(),
     )
 

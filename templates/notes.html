@@ -2,9 +2,14 @@
 
 {% block content %}
 {{ super() }}
-    <p>{{username}}
-    <link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
-    <a href="{{url_for('new_note')}}"><button type="button" name="new_note">Новая заметка</button></a>
+
+
+{% with username=username %}
+    {% include 'sidebar.html' %}
+{% endwith %}
+
+<link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
+<a href="{{url_for('new_note')}}" class="new-note-button"><button type="button" name="new_note">Новая заметка</button></a>
 
 <div class="noteset">
 {% for note in notes %}

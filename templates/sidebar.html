@@ -1,0 +1,21 @@
+<aside class="sidebar">
+
+    <div class="sideref">
+        <a href="{{url_for('notes', username=username)}}">
+            <img src="{{url_for('static', filename='images/note.png')}}" height="48" width="48">
+        </a>
+    </div>
+
+    <div class="sideref">
+        <a href="{{url_for('lectures', username=username)}}">
+            <img src="{{url_for('static', filename='images/lecture.png')}}" height="48" width="48">
+        </a>
+    </div>
+
+    <div class="sideref">
+        <a href="{{url_for('calendar', username=username)}}">
+            <img src="{{url_for('static', filename='images/calendar.png')}}" height="48" width="48">
+        </a>
+    </div>
+
+</aside>

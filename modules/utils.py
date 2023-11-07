@@ -76,10 +76,6 @@ def set_menu():
     return menu
 
 
-def is_user_logged():
-    return None if 'username' not in session else session['username']
-
-
 def error_replacer(error, replacement_error):
     """Decorator for exceptions replace"""
     def wrapper_ext(func):
