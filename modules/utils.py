@@ -91,9 +91,3 @@ def error_replacer(error, replacement_error):
             return result
         return wrapper
     return wrapper_ext
-
-
-class NameExistsError(Exception):
-
-    def __str__(self):
-        return "Указанное имя уже существует"

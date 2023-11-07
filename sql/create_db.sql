@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 CREATE TABLE IF NOT EXISTS notebooks (
     id_note integer PRIMARY KEY AUTOINCREMENT,
-    header text NOT NULL UNIQUE,
+    header text NOT NULL,
     content text NOT NULL,
     creation_date text NOT NULL,
     last_change_date text NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS notebooks (
 
 CREATE TABLE IF NOT EXISTS lectures (
     id_lectured integer PRIMARY KEY AUTOINCREMENT,
-    header text NOT NULL UNIQUE,
+    header text NOT NULL,
     content text NOT NULL,
     creation_date text NOT NULL,
     last_change_date text NOT NULL,
