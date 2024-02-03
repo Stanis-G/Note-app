@@ -8,7 +8,7 @@ from flask import (
 from modules.note import Note
 from modules.database import TableNotes
 from modules.utils import set_menu
-from handlers.profile_handlers import profile_print
+from handlers.profile import profile_print
 
 
 # Config variables
@@ -30,11 +30,11 @@ app.config.update(dict(DATABASE=os.path.join(app.root_path, 'database.db')))
 # main menu pages
 
 # Main page
-@app.route("/index")
+@app.route("/main")
 @app.route("/")
-def index(app_name=app.name):
-    """Main page handler"""
-    return render_template('index.html', app_name=app_name, title='Главная', menu=set_menu(), username=session.get('username'))
+def main(app_name=app.name):
+    """Main page with icons of app sections"""
+    return render_template('main.html', app_name=app_name, title='Главная', menu=set_menu(), username=session.get('username'))
 
 
 # Page with app description
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 # Создание тестового контекста запроса внутри контекста приложения app
 # для проверки наличия переменной
 # with app.test_request_context():
-#   print(url_for('index'))
+#   print(url_for('main'))
 
 
 
