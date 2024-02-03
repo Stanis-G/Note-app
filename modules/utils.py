@@ -65,7 +65,7 @@ class WritableSet(WritableObject):
 
 def set_menu():
     menu = [
-        {'name': 'Главная', 'url': '/index'},
+        {'name': 'Главная', 'url': '/main'},
         {'name': 'О приложении', 'url': '/about'},
         {'name': 'Обратная связь', 'url': '/contact'},
     ]
