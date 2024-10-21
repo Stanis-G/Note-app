@@ -1,30 +1,33 @@
 import os
+from dotenv import load_dotenv
 from datetime import datetime
 from flask import (
     Flask, render_template, url_for, request, g,
     flash, session, redirect, abort
 )
 
+from modules.database import Records
 from modules.note import Note
-from modules.database import TableNotes
 from modules.utils import set_menu
 from handlers.profile import profile_print
 
 
-# Config variables
-DATABASE = 'database.db' # Путь к БД
-DEBUG = True # Режим отладки
-SECRET_KEY = 'ghn2fdngssfis232dnfios253nfonsd'
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB = os.getenv("MONGO_DB")
+# DEBUG = os.getenv("DEBUG")
+# SECRET_KEY = os.getenv("SECRET_KEY")
 
 app = Flask(__name__)
 app.register_blueprint(profile_print)
 
 # Присваиваем приложению случайный секретный ключ
 # Используется для шифрования вводимых пользователем данных
-# app.config['SECRET_KEY'] = 'ghn2fdngssfis232dnfios253nfonsd'
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['DEBUG'] = os.getenv("DEBUG")
 app.config.from_object(__name__) # Загружаем конфигурационные переменные
 # Переопределим путь к БД
-app.config.update(dict(DATABASE=os.path.join(app.root_path, 'database.db')))
+# app.config.update(dict(DATABASE=os.path.join(app.root_path, DATABASE)))
 
 # -----------------------------------------------------------------
 # main menu pages
@@ -70,18 +73,19 @@ def pageNotFound(error):
 
 @app.route("/profile/<path:username>/notes")
 def notes(username):
-    """User profile handler"""
+    """Note page with notes preview"""
     print(username)
     if 'username' not in session or session['username'] != username:
         abort(401)
     
-    notes = TableNotes('database.db', session['username'])
+    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+    notes = db.read_all()
     return render_template(
         "notes.html",
         title='Заметки',
         menu=set_menu(),
         username=session.get('username'),
-        notes=notes.get_all_notes(),
+        notes=notes,
     )
 
 
@@ -89,23 +93,24 @@ def notes(username):
 def new_note():
     """Create new note page"""
 
-    note_table = TableNotes('database.db', session['username'])
+    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
     if request.method == 'GET':
         return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), username=session.get('username'))
     
     if request.method == 'POST':
-        text = request.form['text']
-        note = Note(session['username'], request.form['header'])
-        note.write(text)
-        print(note.owner, note.header)
-        note_table.save_note(note)
+        note = dict(
+            user=session['username'],
+            header=request.form['header'],
+            text=request.form['text'],
+        )
+        db.create_record(note, 'notes')
         return redirect(url_for('notes', username=session['username']))
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])
 def note(header):
     """Note page"""
-    note_table = TableNotes('database.db', session['username'])
+    note_table = TableNotes(DATABASE, session['username'])
 
     note_old = note_table.get_note_by_header(header)
 
@@ -144,7 +149,7 @@ def lectures(username):
     if 'username' not in session or session['username'] != username:
         abort(401)
     
-    notes = TableNotes('database.db', session['username'])
+    notes = TableNotes(DATABASE, session['username'])
     return render_template(
         "lectures.html",
         title='Лекции',
@@ -157,7 +162,7 @@ def lectures(username):
 @app.route('/lecture/<path:header>', methods=['POST', 'GET'])
 def lecture(header):
     """Note page"""
-    note_table = TableNotes('database.db', session['username'])
+    note_table = TableNotes(DATABASE, session['username'])
 
     note_old = note_table.get_note_by_header(header)
 
@@ -196,7 +201,7 @@ def calendar(username):
     if 'username' not in session or session['username'] != username:
         abort(401)
     
-    notes = TableNotes('database.db', session['username'])
+    notes = TableNotes(DATABASE, session['username'])
     return render_template(
         "calendar.html",
         title='Заметки',
@@ -209,7 +214,7 @@ def calendar(username):
 @app.route('/delete/<path:header>', methods=['POST', 'GET'])
 def delete(header):
     """Delete note page"""
-    note_table = TableNotes('database.db', session['username'])
+    note_table = TableNotes(DATABASE, session['username'])
     note_table.delete(header)
     return redirect(url_for('notes', username=session['username']))
 
@@ -218,7 +223,7 @@ def delete(header):
 
 
 
-# Этот блок может остутствовать, а приложение будет запускаться из терминала
+# Этот блок может отсутствовать, а приложение будет запускаться из терминала
 if __name__ == "__main__":
     app.run(debug=True)
 

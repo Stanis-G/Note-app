@@ -1,10 +1,17 @@
+import os
+from dotenv import load_dotenv
+
 from flask import (
     Blueprint, render_template, url_for, request, g,
     flash, session, redirect, abort
 )
 
-from modules.database import TableProfile
+from modules.database import Profiles
 from modules.utils import set_menu
+
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB = os.getenv("MONGO_DB")
 
 
 profile_print = Blueprint(
@@ -17,8 +24,6 @@ profile_print = Blueprint(
 @profile_print.route("/login", methods=['POST', 'GET'])
 def login():
     """Login page"""
-    
-    profiles = TableProfile('database.db')
 
     # Check if user is logged
     if 'username' in session:
@@ -26,11 +31,15 @@ def login():
     
     if request.method == 'POST':
 
-        # Check if username and password are correct
-        is_user_found = request.form['username'] in profiles.get_usernames()
-        is_psw_match_user = request.form['psw'] == profiles.get_profile(request.form['username'])['password']
-        is_user_data_correct = is_user_found and is_psw_match_user
+        db = Profiles(MONGO_URI, MONGO_DB)
+        with db:
 
+            # Check if username and password are correct
+            usernames = [user['username'] for user in db.read_all()]
+            is_user_found = request.form['username'] in usernames
+            user_psw = db.read_record_by_name(request.form['username'])['psw']
+            is_psw_match_user = request.form['psw'] == user_psw
+            is_user_data_correct = is_user_found and is_psw_match_user
         if is_user_data_correct:
             session['username'] = request.form['username']
             return redirect(url_for('profile.profile', username=session['username']))
@@ -54,15 +63,17 @@ def logout():
 def new_profile():
     """Create new profile page"""
 
-    profiles = TableProfile('database.db')
+    db = Profiles(MONGO_URI, MONGO_DB)
 
     if request.method == 'POST':
 
         if request.form['new_psw'] == request.form['psw_check']:
-            login = request.form['new_login']
-            username = request.form['new_username']
-            psw = request.form['new_psw']
-            profiles.create_profile(login, username, psw)
+            profile = dict(
+                login=request.form['new_login'],
+                username=request.form['new_username'],
+                psw=request.form['new_psw'],
+            )
+            db.create_record(profile)
             flash('Профиль создан', category='success')
         else:
             flash('Пароли не совпадают', category='error')

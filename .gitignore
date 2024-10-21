@@ -6,3 +6,10 @@
 
 # Test notebook
 *.ipynb
+
+# Not required files
+Materials
+temp
+
+# Environment variables
+.env
