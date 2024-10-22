@@ -6,7 +6,7 @@ from itertools import product
 import graphviz
 from modules.note import Note
 from modules.lecture import Lecture
-from modules.utils import Writable
+from modules.utils import Record
 
 
 class CommonGraph:

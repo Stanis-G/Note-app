@@ -7,9 +7,17 @@
 <div class="flash {{cat}}">{{msg}}</div>
 {% endfor %}
 <form action="/new_note" method="post" class="form-new-note">
-    <p><label>Название: </label><input type="text" name="header" value="" required />
-    <p><label>Текст: </label>
-    <p><textarea name="text" rows=7 cols=40></textarea>
-    <p><input type="submit" value="Сохранить" />
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.header.label }}<br>
+        {{ form.header(size=32) }}
+    </p>
+    <p>
+        {{ form.text.label }}<br>
+        {{ form.text(size=32) }}
+    </p>
+    <p>
+        {{ form.submit() }}
+    </p>
 </form>
 {% endblock %}

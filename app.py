@@ -7,6 +7,7 @@ from flask import (
 )
 
 from modules.database import Records
+from modules.forms import NewNoteForm
 from modules.note import Note
 from modules.utils import set_menu
 from handlers.profile import profile_print
@@ -79,7 +80,8 @@ def notes(username):
         abort(401)
     
     db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
-    notes = db.read_all()
+    with db:
+        notes = db.read_all()
     return render_template(
         "notes.html",
         title='Заметки',
@@ -93,9 +95,10 @@ def notes(username):
 def new_note():
     """Create new note page"""
 
-    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+    form = NewNoteForm()
+
     if request.method == 'GET':
-        return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), username=session.get('username'))
+        return render_template('new_note.html', title='Создание новой заметки', menu=set_menu(), username=session.get('username'), form=form)
     
     if request.method == 'POST':
         note = dict(
@@ -103,112 +106,48 @@ def new_note():
             header=request.form['header'],
             text=request.form['text'],
         )
-        db.create_record(note, 'notes')
-        return redirect(url_for('notes', username=session['username']))
+        db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+        with db:
+            db.create_record(note)
+        if form.validate_on_submit():
+            return redirect(url_for('notes', username=session['username']))
+        else:
+            pass # Need to raise some error
 
 
 @app.route('/note/<path:header>', methods=['POST', 'GET'])
 def note(header):
     """Note page"""
-    note_table = TableNotes(DATABASE, session['username'])
 
-    note_old = note_table.get_note_by_header(header)
+    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+    with db:
+        note_old = db.read_record_by_name(header)
 
-    if request.method == 'GET':
-        # Open existing note
-        return render_template('note.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
+        if request.method == 'GET':
+            # Open existing note
+            return render_template('note.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
 
-    elif request.method == 'POST':
-        # Change existing note
-        
-        # Take values from form
-        header_new = request.form['header']
-        text_new = request.form['text']
+        elif request.method == 'POST':
+            # Change existing note
+            
+            # Take values from form
+            header_new = request.form['header']
+            text_new = request.form['text']
 
-        # Create new note, which will replace existing one
-        params = dict(
-            header=header_new,
-            creation_date=note_old.creation_date,
-            last_change_date=str(datetime.now()).split('.')[0],
-            owner=note_old.owner,
-            content=note_old.content,
-        )
-        note_new = Note.restore_from_db(params)
-        note_new.write(text_new)
+            # Create new note, which will replace existing one
+            note_new = dict(
+                header=header_new,
+                text=text_new,
+                creation_date=note_old.creation_date,
+                last_change_date=str(datetime.now()).split('.')[0],
+                owner=note_old.owner,
+                content=note_old.content,
+            )
         
         # Update existing note in db
-        note_table.update_note(header_old=header, note_new=note_new)
+        db.update_record_by_name(header, note_new)
 
         return render_template('note.html', title=header_new, menu=set_menu(), username=session.get('username'), note=note_new)
-    
-
-@app.route("/profile/<path:username>/lectures")
-def lectures(username):
-    """User profile handler"""
-
-    if 'username' not in session or session['username'] != username:
-        abort(401)
-    
-    notes = TableNotes(DATABASE, session['username'])
-    return render_template(
-        "lectures.html",
-        title='Лекции',
-        menu=set_menu(),
-        username=session.get('username'),
-        notes=lectures.get_all_notes(),
-    )
-    
-
-@app.route('/lecture/<path:header>', methods=['POST', 'GET'])
-def lecture(header):
-    """Note page"""
-    note_table = TableNotes(DATABASE, session['username'])
-
-    note_old = note_table.get_note_by_header(header)
-
-    if request.method == 'GET':
-        # Open existing note
-        return render_template('lecture.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
-
-    elif request.method == 'POST':
-        # Change existing note
-        
-        # Take values from form
-        header_new = request.form['header']
-        text_new = request.form['text']
-
-        # Create new note, which will replace existing one
-        params = dict(
-            header=header_new,
-            creation_date=note_old.creation_date,
-            last_change_date=str(datetime.now()).split('.')[0],
-            owner=note_old.owner,
-            content=note_old.content,
-        )
-        note_new = Note.restore_from_db(params)
-        note_new.write(text_new)
-        
-        # Update existing note in db
-        note_table.update_note(header_old=header, note_new=note_new)
-
-        return render_template('lecture.html', title=header_new, menu=set_menu(), username=session.get('username'), note=note_new)
-    
-
-@app.route("/profile/<path:username>/calendar")
-def calendar(username):
-    """User profile handler"""
-
-    if 'username' not in session or session['username'] != username:
-        abort(401)
-    
-    notes = TableNotes(DATABASE, session['username'])
-    return render_template(
-        "calendar.html",
-        title='Заметки',
-        menu=set_menu(),
-        username=session.get('username'),
-        notes=notes.get_all_notes(),
-    )
 
 
 @app.route('/delete/<path:header>', methods=['POST', 'GET'])
@@ -219,7 +158,19 @@ def delete(header):
     return redirect(url_for('notes', username=session['username']))
 
 
+# -----------------------------------------------------------------
+# lecture handlers
 
+@app.route("/profile/<path:username>/lectures")
+def lectures(username):
+    """Страница-заглушка"""
+    return '''<html>Заглушка</html>'''
+
+
+@app.route("/profile/<path:username>/calendar")
+def calendar(username):
+    """Страница-заглушка"""
+    return '''<html>Заглушка</html>'''
 
 
 

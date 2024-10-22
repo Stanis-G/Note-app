@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import session
 
 
-class WritableObject:
+class RecordObject:
     
     NUMBER_OF_OBJ = 0
 
@@ -38,8 +38,8 @@ class WritableObject:
         
 
 
-class Writable(WritableObject):
-    """Represents objects, with content like Note or Lecture"""
+class Record(RecordObject):
+    """Represents objects with content like Note or Lecture"""
     
     def __init__(self, owner, header=None):
         super().__init__(owner, header)
@@ -50,16 +50,16 @@ class Writable(WritableObject):
         self.content = data
 
 
-class WritableSet(WritableObject):
-    """Represents set of writable objects"""
+class RecordSet(RecordObject):
+    """Represents set of records"""
 
     def __init__(self, owner, header=None):
         super().__init__(header)
         self.list = []
         
     def create_child(self, header):
-        """Create new Writable instance"""
-        child = Writable(header)
+        """Create new Record instance"""
+        child = Record(header)
         self.list.append(child)
 
 

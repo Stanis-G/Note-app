@@ -1,14 +1,14 @@
-from .utils import Writable, WritableSet
+from .utils import Record, RecordSet
 
 
-class Lecture(Writable):
+class Lecture(Record):
     """Represents lectures"""
 
     # def render(self, **kwargs):
     #     super().render(template_name='lecture.html', **kwargs)
 
 
-class Course(WritableSet):
+class Course(RecordSet):
     """Represents sets of lectures"""
 
     

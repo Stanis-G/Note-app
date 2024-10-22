@@ -12,7 +12,7 @@ from bson import ObjectId
 
 
 class DataBase():
-    """Open conection to MongoDB server, run CRUD operations"""
+    """Open connection to MongoDB server, run CRUD operations on collections"""
 
     def __init__(self, uri, db_name):
         self.uri = uri
@@ -56,13 +56,17 @@ class DataBase():
         pass
 
 
+    def update_record_by_name(self, collection, record_name, new_data):
+        pass
+
+
     # @connect
     def delete_record(self, collection, record_id):
         pass
 
 
 class Profiles(DataBase):
-    """Open conection to MongoDB server, run CRUD operations"""
+    """Connect to collection of users, manipulate user profiles"""
 
     def __init__(self, uri, db_name):
         super().__init__(uri, db_name)
@@ -90,10 +94,10 @@ class Profiles(DataBase):
 
 
 class Records(DataBase):
-    """Open conection to MongoDB server, run CRUD operations"""
+    """Connect to collections of user records, manipulate user data"""
 
     def __init__(self, uri, db_name, username, collection_name):
-        super().__init__(uri, db_name, username)
+        super().__init__(uri, db_name)
         self.user = username
         # self.collection = self.db[collection_name]
         self.collection_name = collection_name
@@ -129,6 +133,10 @@ class Records(DataBase):
     def update_record(self, record_id, new_data):
         object_id = ObjectId(record_id) # wrap id to ObjectId
         self.collection.update_one({"_id": object_id}, new_data)
+
+
+    def update_record_by_name(self, record_name, new_data):
+        self.collection.update_one({"header": record_name}, new_data)
 
 
     # @connect
