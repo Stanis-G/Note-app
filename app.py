@@ -6,7 +6,7 @@ from flask import (
     flash, session, redirect, abort
 )
 
-from modules.database import Records
+from modules.database import NoteCollection, LectureCollection
 from modules.forms import NewNoteForm
 from modules.note import Note
 from modules.utils import set_menu
@@ -66,7 +66,7 @@ def contact():
 @app.errorhandler(404)
 def pageNotFound(error):
     """Not found (404) error handler"""
-    return render_template('base.html', title='Указанной страницы не существует', menu=set_menu()), 404
+    return render_template('header.html', title='Указанной страницы не существует', menu=set_menu()), 404
 
 
 # -----------------------------------------------------------------
@@ -79,7 +79,7 @@ def notes(username):
     if 'username' not in session or session['username'] != username:
         abort(401)
     
-    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+    db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
     with db:
         notes = db.read_all()
     return render_template(
@@ -106,7 +106,7 @@ def new_note():
             header=request.form['header'],
             text=request.form['text'],
         )
-        db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+        db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
         with db:
             db.create_record(note)
         if form.validate_on_submit():
@@ -119,7 +119,7 @@ def new_note():
 def note(header):
     """Note page"""
 
-    db = Records(MONGO_URI, MONGO_DB, session['username'], 'notes')
+    db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
     with db:
         note_old = db.read_record_by_name(header)
 
@@ -129,32 +129,24 @@ def note(header):
 
         elif request.method == 'POST':
             # Change existing note
-            
-            # Take values from form
-            header_new = request.form['header']
-            text_new = request.form['text']
 
-            # Create new note, which will replace existing one
-            note_new = dict(
-                header=header_new,
-                text=text_new,
-                creation_date=note_old.creation_date,
-                last_change_date=str(datetime.now()).split('.')[0],
-                owner=note_old.owner,
-                content=note_old.content,
-            )
+            # Create new note with updated data
+            note_new = note_old
+            note_new.update(request.form)
         
         # Update existing note in db
         db.update_record_by_name(header, note_new)
 
-        return render_template('note.html', title=header_new, menu=set_menu(), username=session.get('username'), note=note_new)
+        return render_template('note.html', title=note_new['header'], menu=set_menu(), username=session.get('username'), note=note_new)
 
 
-@app.route('/delete/<path:header>', methods=['POST', 'GET'])
+@app.route('/delete/<path:header>')
 def delete(header):
     """Delete note page"""
-    note_table = TableNotes(DATABASE, session['username'])
-    note_table.delete(header)
+
+    db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
+    with db:
+        db.delete_record_by_name(header)
     return redirect(url_for('notes', username=session['username']))
 
 
@@ -171,19 +163,3 @@ def lectures(username):
 def calendar(username):
     """Страница-заглушка"""
     return '''<html>Заглушка</html>'''
-
-
-
-# Этот блок может отсутствовать, а приложение будет запускаться из терминала
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-# Создание тестового контекста запроса внутри контекста приложения app
-# для проверки наличия переменной
-# with app.test_request_context():
-#   print(url_for('main'))
-
-
-
-

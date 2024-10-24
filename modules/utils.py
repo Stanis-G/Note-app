@@ -2,65 +2,73 @@ from datetime import datetime
 from flask import session
 
 
-class RecordObject:
-    
-    NUMBER_OF_OBJ = 0
-
-    def __new__(cls, *args, **kwargs):
-        cls.NUMBER_OF_OBJ += 1
-        return super().__new__(cls)
-    
-
-    def __init__(self, owner, header=None):
-        self.set_header(header)
-        self.creation_date=str(datetime.now()).split('.')[0]
-        self.last_change_date=str(datetime.now()).split('.')[0]
-        self.owner=owner
+class RecordObject(dict):
 
 
-    def set_header(self, header=None):
-        self.header = f'{self.__class__.__name__} {self.number_of_obj()}' if not header else header
+    def __init__(self, from_db=False, **kwargs):
+        super().__init__(**kwargs)
+        self.from_db = from_db # True means that object is being restored from db
+        self.set_creation_date()
+        self.set_last_change_date()
+        self.set_header()
 
 
-    @classmethod
-    def number_of_obj(cls):
-        return cls.NUMBER_OF_OBJ
-    
+    def set_creation_date(self):
+        """Assign creation date if not passed"""
+        if 'creation_date' not in self:
+            current_data = str(datetime.now()).split('.')[0]
+            self.__setitem__('creation_date', current_data)
 
-    @classmethod
-    def restore_from_db(cls, db_params):
-        """Restore obj by params dict from db"""
-        note = cls(db_params['owner'], db_params['header'])
-        note.creation_date = db_params['creation_date']
-        note.last_change_date = db_params['last_change_date']
-        note.write(db_params['content'])
-        return note
-        
+
+    def set_last_change_date(self):
+        """Assign last change date to current date"""
+        if not self.from_db:
+            current_data = str(datetime.now()).split('.')[0]
+            self.__setitem__('last_change_date', current_data)
+
+
+    def set_header(self):
+        if 'header' not in self:
+            raise Exception('Header is not defined') # Change to custom exception
+            
 
 
 class Record(RecordObject):
-    """Represents objects with content like Note or Lecture"""
+    """Contains one record data and metainfo"""
     
-    def __init__(self, owner, header=None):
-        super().__init__(owner, header)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.content = None
     
-    def write(self, data):
-        """Write data"""
-        self.content = data
+    # def write(self, data):
+    #     """Write data"""
+    #     self.content = data
+
+
+    def set_content(self):
+        """Assign content"""
+        if 'content' not in self:
+            self.__setitem__('content', '')
 
 
 class RecordSet(RecordObject):
     """Represents set of records"""
 
-    def __init__(self, owner, header=None):
-        super().__init__(header)
-        self.list = []
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_records_lst()
         
-    def create_child(self, header):
-        """Create new Record instance"""
-        child = Record(header)
-        self.list.append(child)
+
+    # def create_child(self, header):
+    #     """Create new Record instance"""
+    #     child = Record(header)
+    #     self.list.append(child)
+
+
+    def set_records_lst(self):
+        """Assign records lst"""
+        if 'records' not in self:
+            self.__setitem__('records', [])
 
 
 def set_menu():

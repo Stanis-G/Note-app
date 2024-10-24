@@ -1,6 +1,9 @@
 from pymongo import MongoClient
 from bson import ObjectId
 
+from modules.note import Note
+from modules.lecture import Lecture
+
 
 # def connect(func):
 #     """Create connection to db server"""
@@ -31,27 +34,22 @@ class DataBase():
         self.client.close()
     
     
-    # @connect
     def create_record(self, data, collection):
         pass
 
 
-    # @connect
     def read_record(self, collection, record_id):
         pass
 
 
-    # @connect
     def read_record_by_name(self, name):
         pass
 
 
-    # @connect
     def read_all(self, collection):
         pass
 
     
-    # @connect
     def update_record(self, collection, record_id, new_data):
         pass
 
@@ -60,17 +58,19 @@ class DataBase():
         pass
 
 
-    # @connect
     def delete_record(self, collection, record_id):
         pass
 
 
-class Profiles(DataBase):
+    def delete_record_by_name(self, record_name):
+        pass
+
+
+class ProfileCollection(DataBase):
     """Connect to collection of users, manipulate user profiles"""
 
     def __init__(self, uri, db_name):
         super().__init__(uri, db_name)
-        # self.collection = self.db['users']
 
 
     def __enter__(self):
@@ -78,28 +78,24 @@ class Profiles(DataBase):
         self.collection = self.db['users']
 
     
-    # @connect
     def create_record(self, data):
         self.collection.insert_one(data)
 
 
-    # @connect
     def read_all(self):
         return list(self.collection.find({}))
     
 
-    # @connect
     def read_record_by_name(self, name):
         return self.collection.find_one({"username": name})
 
 
-class Records(DataBase):
+class RecordCollection(DataBase):
     """Connect to collections of user records, manipulate user data"""
 
     def __init__(self, uri, db_name, username, collection_name):
         super().__init__(uri, db_name)
         self.user = username
-        # self.collection = self.db[collection_name]
         self.collection_name = collection_name
 
 
@@ -108,38 +104,100 @@ class Records(DataBase):
         self.collection = self.db[self.collection_name]
     
     
-    # @connect
     def create_record(self, data):
         self.collection.insert_one(data)
 
 
-    # @connect
     def read_record(self, record_id):
         object_id = ObjectId(record_id) # wrap id to ObjectId
         return self.collection.find_one({"_id": object_id})
     
 
-    # @connect
     def read_record_by_name(self, name):
         return self.collection.find_one({"header": name})
 
 
-    # @connect
     def read_all(self):
         return list(self.collection.find({"user": self.user}))
 
     
-    # @connect
     def update_record(self, record_id, new_data):
         object_id = ObjectId(record_id) # wrap id to ObjectId
-        self.collection.update_one({"_id": object_id}, new_data)
+        self.collection.update_one({"_id": object_id}, {"$set": new_data})
 
 
     def update_record_by_name(self, record_name, new_data):
-        self.collection.update_one({"header": record_name}, new_data)
+        self.collection.update_one({"header": record_name}, {"$set": new_data})
 
 
-    # @connect
     def delete_record(self, record_id):
         object_id = ObjectId(record_id) # wrap id to ObjectId
         self.collection.delete_one({"_id": object_id})
+
+    
+    def delete_record_by_name(self, record_name):
+        self.collection.delete_one({"header": record_name})
+
+
+class NoteCollection(RecordCollection):
+    """Connect to collections of user records, manipulate user data"""
+
+    def __init__(self, uri, db_name, username):
+        super().__init__(uri, db_name, username, collection_name='notes')
+
+
+    def read_record(self, record_id):
+        record = super().read_record(record_id)
+        return Note(from_db=True, **record)
+    
+
+    def read_record_by_name(self, name):
+        record = super().read_record_by_name(name)
+        return Note(from_db=True, **record)
+
+
+    def read_all(self):
+        record_lst = super().read_all()
+        return [Note(from_db=True, **record) for record in record_lst]
+    
+
+    def update_record(self, record_id, new_data):
+        new_data = Note(from_db=False, **new_data)
+        super().update_record(record_id, new_data)
+
+
+    def update_record_by_name(self, record_name, new_data):
+        new_data = Note(from_db=False, **new_data)
+        super().update_record_by_name(record_name, new_data)
+
+
+class LectureCollection(RecordCollection):
+    """Connect to collections of user records, manipulate user data"""
+
+    def __init__(self, uri, db_name, username):
+        super().__init__(uri, db_name, username, collection_name='lectures')
+
+
+    def read_record(self, record_id):
+        record = super().read_record(record_id)
+        return Lecture(from_db=True, **record)
+    
+
+    def read_record_by_name(self, name):
+        record = super().read_record_by_name(name)
+        return Lecture(from_db=True, **record)
+
+
+    def read_all(self):
+        record_lst = super().read_all()
+        return [Lecture(from_db=True, **record) for record in record_lst]
+
+
+    def update_record(self, record_id, new_data):
+        new_data = Lecture(from_db=False, **new_data)
+        super().update_record(record_id, new_data)
+
+
+    def update_record_by_name(self, record_name, new_data):
+        new_data = Lecture(from_db=False, **new_data)
+        super().update_record_by_name(record_name, new_data)

@@ -6,7 +6,7 @@ from flask import (
     flash, session, redirect, abort
 )
 
-from modules.database import Profiles
+from modules.database import ProfileCollection
 from modules.forms import LoginForm, NewProfileForm
 from modules.utils import set_menu
 
@@ -34,7 +34,7 @@ def login():
 
     if request.method == 'POST':
 
-        db = Profiles(MONGO_URI, MONGO_DB)
+        db = ProfileCollection(MONGO_URI, MONGO_DB)
         with db:
 
             # Check if username and password are correct
@@ -71,7 +71,7 @@ def new_profile():
     if request.method == 'POST':
 
         if request.form['password'] == request.form['password_check']:
-            db = Profiles(MONGO_URI, MONGO_DB)
+            db = ProfileCollection(MONGO_URI, MONGO_DB)
             with db:
                 profile = dict(
                     email=request.form['email'],

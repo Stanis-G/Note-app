@@ -14,7 +14,7 @@ class NewProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     password_check = PasswordField('Повторите пароль', validators=[DataRequired()])
-    submit = SubmitField('Войти')
+    submit = SubmitField('Создать')
 
 
 class NewNoteForm(FlaskForm):
