@@ -1,6 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired
+
+
+class ContactForm(FlaskForm):
+    username = StringField('Имя', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    message = StringField('Сообщение', validators=[DataRequired()])
+    submit = SubmitField('Отправить')
 
 
 class LoginForm(FlaskForm):
@@ -19,5 +26,11 @@ class NewProfileForm(FlaskForm):
 
 class NewNoteForm(FlaskForm):
     header = StringField('Название', validators=[DataRequired()])
-    text = StringField('Текст')
+    text = TextAreaField('Текст')
+    submit = SubmitField('Сохранить')
+
+
+class NoteForm(FlaskForm):
+    header = StringField('Название', validators=[DataRequired()])
+    text = TextAreaField('Текст')
     submit = SubmitField('Сохранить')

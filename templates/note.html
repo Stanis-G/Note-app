@@ -4,12 +4,20 @@
 {{ super() }}
 <link type="text/css" href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet" />
 <p class="date">Created {{note.creation_date}}</p>
-<p class="date">Last change {{note.last_change_date}}</p>
+<p class="date">Last changed {{note.last_change_date}}</p>
 
 <form action="/note/{{note.header}}" method="post" class="form-note">
-    <p><label>Название: </label><br><input type="text" name="header" value="{{note.header}}" value="" required />
-    <p><textarea name="text" placeholder="{{note.text}}" rows=7 cols=40>{{note.text}}</textarea>
-    <p><input type="submit" value="Сохранить" />
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.header.label }}<br>
+        {{ form.header(value=note.header, class_='form-input') }}<br>
+    </p>
+    <p>
+        {{ form.text.label }}<br>
+        {{ form.text(value=note.text, class_='form-input') }}
+    </p>
+    <p>
+        {{ form.submit(class_='form-submit') }}
+    </p>
 </form>
-
 {% endblock %}

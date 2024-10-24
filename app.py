@@ -7,7 +7,7 @@ from flask import (
 )
 
 from modules.database import NoteCollection, LectureCollection
-from modules.forms import NewNoteForm
+from modules.forms import NewNoteForm, NoteForm, ContactForm
 from modules.note import Note
 from modules.utils import set_menu
 from handlers.profile import profile_print
@@ -52,14 +52,16 @@ def about(app_name=app.name):
 def contact():
     """Contact form handler"""
 
+    form = ContactForm()
+
     if request.method == 'POST':
 
         # Preliminary checks
-        if len(request.form['username']) > 2:
+        if form.validate_on_submit():
             flash('Сообщение отправлено', category='success')
         else:   
             flash('Ошибка отправки', category='error')
-    return render_template('contact.html', title='Обратная связь', menu=set_menu(), username=session.get('username'))
+    return render_template('contact.html', title='Обратная связь', menu=set_menu(), username=session.get('username'), form=form)
 
 
 # Error handler
@@ -119,13 +121,15 @@ def new_note():
 def note(header):
     """Note page"""
 
+    form = NoteForm()
+
     db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
     with db:
         note_old = db.read_record_by_name(header)
 
         if request.method == 'GET':
             # Open existing note
-            return render_template('note.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old)
+            return render_template('note.html', title=header, menu=set_menu(), username=session.get('username'), note=note_old, form=form)
 
         elif request.method == 'POST':
             # Change existing note
@@ -134,10 +138,12 @@ def note(header):
             note_new = note_old
             note_new.update(request.form)
         
-        # Update existing note in db
-        db.update_record_by_name(header, note_new)
-
-        return render_template('note.html', title=note_new['header'], menu=set_menu(), username=session.get('username'), note=note_new)
+        if form.validate_on_submit():
+            # Update existing note in db
+            db.update_record_by_name(header, note_new)
+            return redirect(url_for('notes', username=session['username']))
+        else:
+            pass # Need to raise some error
 
 
 @app.route('/delete/<path:header>')

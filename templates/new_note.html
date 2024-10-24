@@ -10,14 +10,14 @@
     {{ form.hidden_tag() }}
     <p>
         {{ form.header.label }}<br>
-        {{ form.header(size=32) }}<br>
+        {{ form.header(class_='form-input') }}<br>
     </p>
     <p>
         {{ form.text.label }}<br>
-        {{ form.text(size=32) }}
+        {{ form.text(class_='form-input') }}
     </p>
     <p>
-        {{ form.submit() }}
+        {{ form.submit(class_='form-submit') }}
     </p>
 </form>
 {% endblock %}

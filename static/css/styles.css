@@ -56,6 +56,54 @@ div.content {
     font-size: 16px;
 }
 
+* General form-note styling */
+.form-note {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Styling for input fields (both header and text) */
+.form-input {
+    min-width: 80px;
+    width: 100%; /* Make the input fields take full width */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+/* Styling for submit button */
+.form-submit { 
+    margin-top: 20px;
+    margin-left: 20px;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 25px;
+    background: #ff9900;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: white;
+}
+
+.form-submit:hover { 
+    background: #ff6600;
+}
+
+/* Label styling */
+.form-note label {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Spacing between form sections */
+.form-note p {
+    margin: 20px 0 10px 0;
+}
+
 .flash {padding: 10px;}
 .flash.success {
     border: 1px solid #21DB56;
