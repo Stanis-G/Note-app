@@ -8,7 +8,6 @@ from flask import (
 
 from modules.database import NoteCollection, LectureCollection
 from modules.forms import NewNoteForm, NoteForm, ContactForm
-from modules.note import Note
 from modules.utils import set_menu
 from handlers.profile import profile_print
 
@@ -104,7 +103,7 @@ def new_note():
     
     if request.method == 'POST':
         note = dict(
-            user=session['username'],
+            username=session['username'],
             header=request.form['header'],
             text=request.form['text'],
         )

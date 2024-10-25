@@ -5,15 +5,6 @@ from modules.note import Note
 from modules.lecture import Lecture
 
 
-# def connect(func):
-#     """Create connection to db server"""
-#     def wrapper(obj, *args, **kwargs):
-#         with obj.client:
-#             result = func(obj, *args, **kwargs)
-#         return result
-#     return wrapper
-
-
 class DataBase():
     """Open connection to MongoDB server, run CRUD operations on collections"""
 
@@ -38,8 +29,8 @@ class DataBase():
         pass
 
 
-    def read_record(self, collection, record_id):
-        pass
+    # def read_record(self, collection, record_id):
+    #     pass
 
 
     def read_record_by_name(self, name):
@@ -50,16 +41,16 @@ class DataBase():
         pass
 
     
-    def update_record(self, collection, record_id, new_data):
-        pass
+    # def update_record(self, collection, record_id, new_data):
+    #     pass
 
 
     def update_record_by_name(self, collection, record_name, new_data):
         pass
 
 
-    def delete_record(self, collection, record_id):
-        pass
+    # def delete_record(self, collection, record_id):
+    #     pass
 
 
     def delete_record_by_name(self, record_name):
@@ -93,24 +84,30 @@ class ProfileCollection(DataBase):
 class RecordCollection(DataBase):
     """Connect to collections of user records, manipulate user data"""
 
-    def __init__(self, uri, db_name, username, collection_name):
+    def __init__(self, uri, db_name, username, collection_name, test_mode=False):
         super().__init__(uri, db_name)
         self.user = username
         self.collection_name = collection_name
+        self.test_mode = test_mode
 
 
     def __enter__(self):
         super().__enter__()
         self.collection = self.db[self.collection_name]
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.test_mode:
+            self.collection.delete_many({})
+        return super().__exit__(exc_type, exc_value, traceback)
     
     
     def create_record(self, data):
         self.collection.insert_one(data)
 
 
-    def read_record(self, record_id):
-        object_id = ObjectId(record_id) # wrap id to ObjectId
-        return self.collection.find_one({"_id": object_id})
+    # def read_record(self, record_id):
+    #     object_id = ObjectId(record_id) # wrap id to ObjectId
+    #     return self.collection.find_one({"_id": object_id})
     
 
     def read_record_by_name(self, name):
@@ -118,21 +115,31 @@ class RecordCollection(DataBase):
 
 
     def read_all(self):
-        return list(self.collection.find({"user": self.user}))
+        return list(self.collection.find({"username": self.user}))
 
     
-    def update_record(self, record_id, new_data):
-        object_id = ObjectId(record_id) # wrap id to ObjectId
-        self.collection.update_one({"_id": object_id}, {"$set": new_data})
+    # def update_record(self, record_id, new_data):
+    #     object_id = ObjectId(record_id) # wrap id to ObjectId
+    #     self.collection.update_one({"_id": object_id}, {"$set": new_data})
 
 
     def update_record_by_name(self, record_name, new_data):
-        self.collection.update_one({"header": record_name}, {"$set": new_data})
+        if 'header' in new_data and new_data['header'] != record_name:
+            # Create new record if new header passed
+            data = self.read_record_by_name(record_name)
+            self.delete_record_by_name(record_name)
+            data.pop('_id')
+            data.update(new_data)
+            self.create_record(new_data)
+        else:
+            # Update existing record if header is not changed
+            new_data.update({'header': record_name})
+            self.collection.update_one({"header": record_name}, {"$set": new_data})
 
 
-    def delete_record(self, record_id):
-        object_id = ObjectId(record_id) # wrap id to ObjectId
-        self.collection.delete_one({"_id": object_id})
+    # def delete_record(self, record_id):
+    #     object_id = ObjectId(record_id) # wrap id to ObjectId
+    #     self.collection.delete_one({"_id": object_id})
 
     
     def delete_record_by_name(self, record_name):
@@ -142,13 +149,18 @@ class RecordCollection(DataBase):
 class NoteCollection(RecordCollection):
     """Connect to collections of user records, manipulate user data"""
 
-    def __init__(self, uri, db_name, username):
-        super().__init__(uri, db_name, username, collection_name='notes')
+    def __init__(self, uri, db_name, username, test_mode=False):
+        super().__init__(uri, db_name, username, collection_name='notes', test_mode=test_mode)
 
 
-    def read_record(self, record_id):
-        record = super().read_record(record_id)
-        return Note(from_db=True, **record)
+    def create_record(self, data):
+        data = Note(from_db=False, **data)
+        super().create_record(data)
+
+
+    # def read_record(self, record_id):
+    #     record = super().read_record(record_id)
+    #     return Note(from_db=True, **record)
     
 
     def read_record_by_name(self, name):
@@ -161,9 +173,9 @@ class NoteCollection(RecordCollection):
         return [Note(from_db=True, **record) for record in record_lst]
     
 
-    def update_record(self, record_id, new_data):
-        new_data = Note(from_db=False, **new_data)
-        super().update_record(record_id, new_data)
+    # def update_record(self, record_id, new_data):
+    #     new_data = Note(from_db=False, **new_data)
+    #     super().update_record(record_id, new_data)
 
 
     def update_record_by_name(self, record_name, new_data):
@@ -174,13 +186,18 @@ class NoteCollection(RecordCollection):
 class LectureCollection(RecordCollection):
     """Connect to collections of user records, manipulate user data"""
 
-    def __init__(self, uri, db_name, username):
-        super().__init__(uri, db_name, username, collection_name='lectures')
+    def __init__(self, uri, db_name, username, test_mode=False):
+        super().__init__(uri, db_name, username, collection_name='lectures', test_mode=test_mode)
 
 
-    def read_record(self, record_id):
-        record = super().read_record(record_id)
-        return Lecture(from_db=True, **record)
+    def create_record(self, data):
+        data = Lecture(from_db=False, **data)
+        super().create_record(data)
+
+
+    # def read_record(self, record_id):
+    #     record = super().read_record(record_id)
+    #     return Lecture(from_db=True, **record)
     
 
     def read_record_by_name(self, name):
@@ -193,9 +210,9 @@ class LectureCollection(RecordCollection):
         return [Lecture(from_db=True, **record) for record in record_lst]
 
 
-    def update_record(self, record_id, new_data):
-        new_data = Lecture(from_db=False, **new_data)
-        super().update_record(record_id, new_data)
+    # def update_record(self, record_id, new_data):
+    #     new_data = Lecture(from_db=False, **new_data)
+    #     super().update_record(record_id, new_data)
 
 
     def update_record_by_name(self, record_name, new_data):

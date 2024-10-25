@@ -13,3 +13,6 @@ temp
 
 # Environment variables
 .env
+
+# Extention config
+*.json

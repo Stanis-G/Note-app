@@ -2,7 +2,7 @@
 
 {% block content %}
 {{ super() }}
-<!-- Вызываем мгновенное сообщение -->
+
 {% for cat, msg in get_flashed_messages(True) %}
 <div class="flash {{cat}}">{{msg}}</div>
 {% endfor %}
@@ -18,7 +18,7 @@
     </p>
     <p>
         {{ form.message.label }}<br>
-        {{ form.message(size=32) }}
+        {{ form.message(class_='form-input') }}
     </p>
     <p>
         {{ form.submit() }}

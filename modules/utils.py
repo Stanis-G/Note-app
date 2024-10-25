@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import session
+from markdown import markdown
 
 
 class RecordObject(dict):
@@ -38,7 +39,15 @@ class Record(RecordObject):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.content = None
+        # self.render()
+
+
+    # def render(self):
+    #     """Render text markdown syntax to html"""
+    #     text = self.get('text') or ''
+    #     text = markdown(text)
+    #     self.__setitem__('text', text)
+        
     
     # def write(self, data):
     #     """Write data"""
