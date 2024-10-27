@@ -23,9 +23,14 @@ class RecordObject(dict):
 
     def set_last_change_date(self):
         """Assign last change date to current date"""
-        if not self.from_db:
+        # If data is just created
+        is_data_new = not self.from_db
+        # If data restored from db, but last_change_date is missing
+        is_field_miss = self.from_db and 'last_change_date' not in self
+        if is_data_new or is_field_miss:
             current_data = str(datetime.now()).split('.')[0]
             self.__setitem__('last_change_date', current_data)
+            
 
 
     def set_header(self):
@@ -37,8 +42,8 @@ class RecordObject(dict):
 class Record(RecordObject):
     """Contains one record data and metainfo"""
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    # def __init__(self, from_db=False, **kwargs):
+    #     super().__init__(from_db, **kwargs)
         # self.render()
 
 

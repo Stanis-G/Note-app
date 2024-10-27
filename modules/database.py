@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-from bson import ObjectId
 
 from modules.note import Note
 from modules.lecture import Lecture
@@ -11,8 +10,6 @@ class DataBase():
     def __init__(self, uri, db_name):
         self.uri = uri
         self.db_name = db_name
-        # self.client = MongoClient(uri)
-        # self.db = self.client[db_name]
 
 
     def __enter__(self):
@@ -29,10 +26,6 @@ class DataBase():
         pass
 
 
-    # def read_record(self, collection, record_id):
-    #     pass
-
-
     def read_record_by_name(self, name):
         pass
 
@@ -40,17 +33,9 @@ class DataBase():
     def read_all(self, collection):
         pass
 
-    
-    # def update_record(self, collection, record_id, new_data):
-    #     pass
-
 
     def update_record_by_name(self, collection, record_name, new_data):
         pass
-
-
-    # def delete_record(self, collection, record_id):
-    #     pass
 
 
     def delete_record_by_name(self, record_name):
@@ -103,11 +88,6 @@ class RecordCollection(DataBase):
     
     def create_record(self, data):
         self.collection.insert_one(data)
-
-
-    # def read_record(self, record_id):
-    #     object_id = ObjectId(record_id) # wrap id to ObjectId
-    #     return self.collection.find_one({"_id": object_id})
     
 
     def read_record_by_name(self, name):
@@ -116,11 +96,6 @@ class RecordCollection(DataBase):
 
     def read_all(self):
         return list(self.collection.find({"username": self.user}))
-
-    
-    # def update_record(self, record_id, new_data):
-    #     object_id = ObjectId(record_id) # wrap id to ObjectId
-    #     self.collection.update_one({"_id": object_id}, {"$set": new_data})
 
 
     def update_record_by_name(self, record_name, new_data):
@@ -135,11 +110,6 @@ class RecordCollection(DataBase):
             # Update existing record if header is not changed
             new_data.update({'header': record_name})
             self.collection.update_one({"header": record_name}, {"$set": new_data})
-
-
-    # def delete_record(self, record_id):
-    #     object_id = ObjectId(record_id) # wrap id to ObjectId
-    #     self.collection.delete_one({"_id": object_id})
 
     
     def delete_record_by_name(self, record_name):
@@ -156,11 +126,6 @@ class NoteCollection(RecordCollection):
     def create_record(self, data):
         data = Note(from_db=False, **data)
         super().create_record(data)
-
-
-    # def read_record(self, record_id):
-    #     record = super().read_record(record_id)
-    #     return Note(from_db=True, **record)
     
 
     def read_record_by_name(self, name):
@@ -171,11 +136,6 @@ class NoteCollection(RecordCollection):
     def read_all(self):
         record_lst = super().read_all()
         return [Note(from_db=True, **record) for record in record_lst]
-    
-
-    # def update_record(self, record_id, new_data):
-    #     new_data = Note(from_db=False, **new_data)
-    #     super().update_record(record_id, new_data)
 
 
     def update_record_by_name(self, record_name, new_data):
@@ -193,11 +153,6 @@ class LectureCollection(RecordCollection):
     def create_record(self, data):
         data = Lecture(from_db=False, **data)
         super().create_record(data)
-
-
-    # def read_record(self, record_id):
-    #     record = super().read_record(record_id)
-    #     return Lecture(from_db=True, **record)
     
 
     def read_record_by_name(self, name):
@@ -208,11 +163,6 @@ class LectureCollection(RecordCollection):
     def read_all(self):
         record_lst = super().read_all()
         return [Lecture(from_db=True, **record) for record in record_lst]
-
-
-    # def update_record(self, record_id, new_data):
-    #     new_data = Lecture(from_db=False, **new_data)
-    #     super().update_record(record_id, new_data)
 
 
     def update_record_by_name(self, record_name, new_data):

@@ -1,31 +1,4 @@
-import os
-from dotenv import load_dotenv
-from pymongo import MongoClient
 import pytest
-
-from ..database import NoteCollection
-from ..note import Note
-
-load_dotenv()
-MONGO_URI = os.getenv("MONGO_URI")
-MONGO_DB = os.getenv("MONGO_DB_TEST")
-
-
-@pytest.fixture
-def note():
-
-    note = {
-        'username': 'user_test',
-        'header': 'header_test',
-        'text': 'text_test',
-    }
-    
-    return note
-
-
-@pytest.fixture
-def db_note(note):
-    return NoteCollection(MONGO_URI, MONGO_DB, note['username'], test_mode=True)
 
 
 def test_create_record_read_record_by_name(note, db_note):

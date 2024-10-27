@@ -125,6 +125,7 @@ def note(header):
     db = NoteCollection(MONGO_URI, MONGO_DB, session['username'])
     with db:
         note_old = db.read_record_by_name(header)
+        form.text.data = note_old['text']
 
         if request.method == 'GET':
             # Open existing note
